@@ -16,6 +16,40 @@ let node_selected = []
 // let lineNodes = []
 // let toconnect = { frm: '', to: '', bridge: [] }
 
+cnvs.addEventListener('mousemove', handle_mouse_move)
+cnvs.addEventListener('click', handle_click)
+cnvs.addEventListener('mousedown', handle_mouse_down)
+cnvs.addEventListener('mouseup', handle_mouse_up)
+cnvs.addEventListener('contextmenu', handle_right_click)
+window.addEventListener('resize', handle_window_resize)
+
+function handle_mouse_move(params) {
+
+}
+
+function handle_click(params) {
+
+}
+
+function handle_mouse_down(params) {
+
+}
+
+function handle_mouse_up(params) {
+
+}
+
+function handle_right_click(params) {
+
+}
+
+function handle_window_resize(ev) {
+    let side_bar = 40
+    cnvs.setAttribute('width', `${section.offsetWidth - side_bar}px`)
+    cnvs.setAttribute('height', `${section.offsetHeight}px`)
+}
+handle_window_resize()
+
 let logics = document.getElementsByClassName('box')
 for (const logic of logics) {
     logic.addEventListener('click', insert_node)
@@ -56,19 +90,67 @@ class NODE {
         this.stroke = stroke
         this.fill = fill
     }
-    init = (inpin_len, outpin_len) => {
-
+    calculate_bounding_rect = () => {
+        this.bottom = Math.floor(this.y + this.h)
+        this.top = Math.floor(this.y)
+        this.left = Math.floor(this.x)
+        this.right = Math.floor(this.x + this.w)
     }
-    space_evenly = () => {
-
+    init = (inpin_len, outpin_len) => {
+        let r = 6
+        for (let x = 0; x < inpin_len; x++) {
+            this.inpin.push(new PIN(0, 0, r, 'IN', this.fill, this.stroke,))
+        }
+        for (let x = 0; x < outpin_len; x++) {
+            this.outpin.push(new PIN(0, 0, r, 'OUT', this.fill, this.stroke,))
+        }
+        //touch this
+        this.w = 80
+        this.h = 40
+        this.calculate_pin_pos(inpin_len, outpin_len, r)
+        this.calculate_bounding_rect()
+        this.
+        this.draw()
+    }
+    calculate_pin_pos = (inpin_len, outpin_len, r) => {
+        let in_y = this.space_evenly(this.y, (this.y + this.h), inpin_len, r)
+        let out_y = this.space_evenly(this.y, (this.y + this.h), outpin_len, r)
+        console.log(in_y);
+        this.inpin.forEach((pin, x) => {
+            pin.x = this.x
+            pin.y = in_y[x]
+        });
+        this.outpin.forEach((pin, x) => {
+            pin.x = this.x + this.w
+            pin.y = out_y[x]
+        });
+    }
+    space_evenly = (y1, y2, len, r) => {
+        let coord = []
+        let spacing = (((y2 - y1) - ((r * 2) * len)) / (len + 1))
+        for (let x = 0; x < len; x++) {
+            let y = 0
+            y = y1 + spacing + (spacing * x) + ((r * 2) * x) + r
+            coord.push(y)
+        } return coord
     }
     draw = () => {
+        let new_cnvs = new CANVAS
+        new_cnvs.draw_rect(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
+        new_cnvs.draw_text(this.x, this.y, this.w, this.h, this.name)
+        this.inpin.forEach(pin => {
+            new_cnvs.draw_circle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
+        })
+
+        this.outpin.forEach(pin => {
+            new_cnvs.draw_circle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
+        })
 
     }
 }
 class PIN extends NODE {
-    constructor(x, y, r, fill = 'blue', stroke = 'grey') {
-        super(x, y, 'INPUT', fill, stroke)
+    constructor(x, y, r, name, fill = 'blue', stroke = 'grey') {
+        super(x, y, name, fill, stroke)
         this.connected = []
         this.state = 0
         this.r = r
@@ -96,8 +178,8 @@ class NOT extends NODE {
 }
 
 class CANVAS {
-    draw_circle = (x, y, r, fill, stroke) => {
-        cnt.lineWidth = 1
+    draw_circle = (x, y, r, fill, stroke, lwidth) => {
+        cnt.lineWidth = lwidth
         cnt.beginPath()
         cnt.strokeStyle = stroke
         cnt.arc(x, y, r, 0, 2 * Math.PI)
@@ -136,3 +218,4 @@ class CANVAS {
         cnt.stroke()
     }
 }
+
