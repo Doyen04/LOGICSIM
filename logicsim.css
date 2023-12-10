@@ -1,0 +1,86 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+body{
+    width: 100vw;
+    height: 100vh;
+    background-color: rgb(71, 71, 71);
+    --c: #58c;
+    --b: rgba(255, 255, 255, 0.267);
+    --t: rgba(255, 255, 255, 0.144);
+    --n: transparent;
+}
+
+body{
+    background-image:
+            linear-gradient(0deg,
+            var(--n) 0%, var(--n) 9px,
+            var(--b) 9px, var(--b) 10px, var(--n) 10px, var(--n) 19px,
+            var(--t) 19px, var(--t) 20px, var(--n) 20px, var(--n) 29px,
+            var(--t) 29px, var(--t) 30px, var(--n) 30px, var(--n) 39px,
+            var(--t) 39px, var(--t) 40px, var(--n) 40px, var(--n) 49px,
+            var(--t) 49px, var(--t) 50px),
+            linear-gradient(-90deg,
+            var(--n) 0%, var(--n) 9px,
+            var(--b) 9px, var(--b) 10px, var(--n) 10px, var(--n) 19px,
+            var(--t) 19px, var(--t) 20px, var(--n) 20px, var(--n) 29px,
+            var(--t) 29px, var(--t) 30px, var(--n) 30px, var(--n) 39px,
+            var(--t) 39px, var(--t) 40px, var(--n) 40px, var(--n) 49px,
+            var(--t) 49px, var(--t) 50px);
+    background-size: 50px 50px;
+}
+
+header{
+    width: 100%;
+    height: 40px;
+    background-color: rgb(27, 27, 44);
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    color: white;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+aside{
+    width: 40px;
+    height: 100% ;
+    background-color: rgb(27, 27, 44);
+    border-top: 1px solid var(--b);
+    border-bottom: 1px solid var(--b);
+}
+
+
+.box{
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(163, 156, 156);
+    font-weight: bold;
+    font-family: monospace;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+canvas{
+    background-color: rgba(154, 165, 154, 0.212);
+    /* width: calc(100% - 40px);
+    height: 100%; */
+}
+
+section{
+    height: calc(100% - 80px);
+    width: 100%;
+    display: flex;
+}
+
+footer{
+    width: 100%;
+    height: 40px;
+    background-color: rgb(27, 27, 44);
+
+}

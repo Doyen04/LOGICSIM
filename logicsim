@@ -1,0 +1,860 @@
+
+async function run(ev) {
+    console.log(33);
+    let res = await window.showOpenFilePicker(3)
+    console.log(res);
+    console.log(44);
+}
+
+
+let body = document.getElementsByTagName('body')[0]
+let canvas = document.getElementById('canvas')
+let context = canvas.getContext('2d')
+let section = document.getElementsByTagName('section')[0]
+let buttonisclick = false
+let ismousedown = false
+let mousedrag = false
+let mouse_coord = { x: 0, y: 0 }
+let gap = 10
+// let mousedist = 0
+
+let wires = []
+let canvaslogic = []
+let selectedlogic = []
+let selectedline = []
+let lineNodes = []
+let toconnect = { frm: '', to: '', bridge: [] }
+
+let boxes = document.getElementsByClassName('box')
+for (const box of boxes) {
+    box.addEventListener('click', insertlogic)
+}
+
+// class Logic {
+//     constructor(name, location, fill, stroke) {
+//         this.name = name
+//         this.location = location
+//         this.fill = fill
+//         this.stroke = stroke
+//         this.bottom = 0
+//         this.left = 0
+//         this.right = 0
+//         this.top = 0
+
+//         if (name == 'AND' || name == 'NOT') {
+//             this.inpin = []
+//             this.outpin = []
+//             this.h = 50
+//             this.w = 80
+//         } else if (name == 'IN') {
+//             this.state = ''
+//             this.outpin = []
+//             this.radius = 20
+//         } else if (name == 'OUT') {
+//             this.state = ''
+//             this.inpin = []
+//             this.radius = 20
+//             this.connectedto = []
+//         }
+
+//     }
+// }
+
+function getstrokeandfill(name) {
+    if (name == 'AND') {
+        return ['black', 'green']
+    } else if (name == 'NOT') {
+        return ['blue', 'brown']
+    } else if (name == 'IN' || name == 'OUT') {
+        return ['black', 'blue']
+    }
+
+}
+
+function insertlogic(ev) {
+    //prevents event from touching body
+    // ev.stopPropagation()
+
+    if (buttonisclick && selectedlogic != '' && selectedlogic[0].name != ev.target.innerText) {
+        selectedlogic = []
+
+    }
+
+    buttonisclick = true
+
+    let area = ev.target.getBoundingClientRect()
+    let canvasarea = canvas.getBoundingClientRect()
+
+    let [x, y] = [0, area.y - canvasarea.y]
+    let name = ev.target.innerText
+
+    mouse_coord = { x: x, y: y }//storing to preventing jumping
+
+    let logic = createlogicobject(name, x, y)
+
+    selectedlogic.push(logic)
+
+    arrangelogic(selectedlogic, x)
+
+}
+
+function createlogicobject(name, x, y) {
+    let [stroke, fill] = getstrokeandfill(name)
+    let logic = new Logic(name, { x: x, y: y }, fill, stroke)
+
+    function genlogic(n, name) {
+        let res = []
+        for (let x = 0; x < n; x++) {
+            let p = new Logic(name, { x: 0, y: 0 }, fill, stroke)
+            p.radius = 6
+            res.push(p)
+        } return res
+    }
+    //continue here
+
+    if (name == 'AND') {
+        logic.inpin = genlogic(2, 'IN')
+        logic.outpin = genlogic(1, 'OUT')
+    } else if (name == "NOT") {
+        logic.inpin = genlogic(1, 'IN')
+        logic.outpin = genlogic(1, 'OUT')
+    } else if (name == "IN") {
+        logic.state = 0
+        logic.outpin = genlogic(1, 'OUT')
+    } else if (name == "OUT") {
+        logic.state = 0
+        logic.inpin = genlogic(1, 'IN')
+    }
+    return logic
+}
+function arrangelogic(array, x) {
+    let y = 0
+    for (let p = 0; p < array.length; p++) {
+        const elm = array[p];
+        elm.location.x = x
+        if (p > 0) {
+            if (elm.name == 'AND' || elm.name == 'NOT') {
+                elm.location.y = y + elm.h + gap
+            } else if (elm.name == 'IN' || elm.name == 'OUT') {
+                elm.location.y = y + (elm.radius * 2) + gap
+            }
+
+        }
+        y = elm.location.y
+        updateboundrect(elm)
+    }
+
+}
+
+function repaintlogic(array) {
+    // context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+    for (let xx = 0; xx < array.length; xx++) {
+        const elm = array[xx];
+        if (elm.name == 'IN' || elm.name == "OUT") {
+            // console.log(elm);
+            drawinputoutput(elm)
+        } else if (elm.name == 'AND' || elm.name == "NOT") {
+
+            drawlogic(elm)
+            drawpins(elm)
+
+        }
+    }
+}
+//arrangement and drawing and smaller circle
+
+function drawinputoutput(elm) {
+    // add half to make it beta
+    let dtx = elm.location.x + (elm.radius)
+    let dty = elm.location.y + (elm.radius)
+    let linewid = 20
+    let [linex, liney, linex1] = [0, 0, 0]
+    let [scx, scy] = [0, 0]
+    let sc = ''
+    if (elm.name == 'IN') {
+        linex = elm.right
+        liney = dty
+        linex1 = linex + linewid
+        scy = dty
+        scx = linex1
+        sc = elm.outpin[0]
+        //
+        sc.state = elm.state
+
+    } else if (elm.name == 'OUT') {
+        sc = elm.inpin[0]
+        liney = dty
+        linex = elm.left
+        linex1 = linex - linewid
+        scx = linex1
+        scy = dty
+        //
+        elm.state = sc.state
+    }
+    sc.location = { x: scx - sc.radius, y: scy - sc.radius }
+    elm.fill = (elm.state == 0) ? 'blue' : 'red';
+    drawline(linex, liney, linex1, liney, [], 'black', 3)
+    drawcircle(dtx, dty, elm.radius, elm.stroke, elm.fill)
+    drawcircle(scx, scy, sc.radius, sc.stroke, sc.fill)
+}
+//set lin width for alllll
+function drawpins(elm) {
+    let inpinscount = elm.inpin.length
+    let outpinscount = elm.outpin.length
+    let radius = elm.inpin[0].radius
+    let gap = ((elm.h - ((radius * 2) * inpinscount)) / (inpinscount + 1))
+
+    for (let pp = 0; pp < inpinscount; pp++) {
+        const element = elm.inpin[pp];
+        let x = elm.location.x
+        let y = elm.location.y + (pp * ((radius * 2) + gap)) + gap
+        element.location = { x: x - (radius), y: y }
+        drawcircle(x, y + (radius), radius, element.stroke, element.fill)
+    }
+
+    let _gap = ((elm.h - ((radius * 2) * outpinscount)) / (outpinscount + 1))
+    for (let kk = 0; kk < outpinscount; kk++) {
+        const element = elm.outpin[kk];
+        let x = elm.location.x + elm.w
+        let y = elm.location.y + (kk * ((radius * 2) + _gap)) + _gap
+        element.location = { x: x - (radius), y: y }
+        drawcircle(x, y + (radius), radius, element.stroke, element.fill)
+    }
+}
+
+function drawcircle(x, y, pinsize, stroke, fill) {
+    context.lineWidth = 1
+    context.beginPath()
+    context.strokeStyle = stroke
+    context.arc(x, y, pinsize, 0, 2 * Math.PI)
+    context.fillStyle = fill
+    context.fill()
+    context.stroke()
+
+}
+
+function drawtext(name, width, height, x, y,) {
+
+    context.beginPath()
+    context.fillStyle = 'white'
+    context.font = '12px cursive'
+    let text = context.measureText(name)
+    let textheight = text.actualBoundingBoxAscent
+    context.fillText(name, x + ((width - text.width) / 2), y + ((height + textheight) / 2));
+    context.stroke()
+
+}
+function updateboundrect(elm) {
+    // console.log(elm);
+    let height = 0
+    let width = 0
+    if (elm.name == "IN" || elm.name == "OUT") {
+        height = elm.radius * 2
+        width = elm.radius * 2
+    } else {
+        height = elm.h
+        width = elm.w
+    }
+    let top = elm.location.y
+    let bottom = elm.location.y + height
+    let left = elm.location.x
+    let right = elm.location.x + width
+
+
+    elm.top = Math.floor(top)
+    elm.bottom = Math.floor(bottom)
+    elm.left = Math.floor(left)
+    elm.right = Math.floor(right)
+}
+function drawlogic(elm,) {
+
+    context.lineWidth = 1
+    drawrect(elm.fill, elm.stroke, elm.location.x, elm.location.y, elm.w, elm.h)
+    drawtext(elm.name, elm.w, elm.h, elm.location.x, elm.location.y)
+    // updateboundrect(elm)
+}
+function drawrect(fill, stroke, x, y, width, height) {
+
+    context.beginPath()
+    context.strokeStyle = stroke
+    context.rect(x, y, width, height)
+    context.setLineDash([])
+    context.fillStyle = fill
+    context.fillRect(x, y, width, height)
+    context.stroke()
+}
+
+function drawlinem(x1, y1, x2, y2, pattern, stroke) {
+
+    drawline(x1, y1, x2, y2, pattern, stroke, 1)
+    drawrect('black', stroke, x1 - 2, y1 - 2, 5, 5)
+    drawrect('black', stroke, x2 - 2, y2 - 2, 5, 5)
+
+}
+
+function drawline(x1, y1, x2, y2, pattern, stroke, lwidth) {
+    context.beginPath()
+
+    context.moveTo(x1, y1)
+    context.lineTo(x2, y2)
+    context.lineWidth = lwidth
+    context.strokeStyle = stroke
+    context.setLineDash(pattern)
+    context.stroke()
+}
+
+canvas.addEventListener('mousemove', movingmouse)
+canvas.addEventListener('click', clickedmouse)
+canvas.addEventListener('mousedown', mousedown)
+canvas.addEventListener('mouseup', mouseup)
+canvas.addEventListener('contextmenu', rightclick)
+window.addEventListener('resize', getcanvasarea)
+
+let match = [[], []]
+function movingmouse(ev) {
+
+    let newx = ev.offsetX - mouse_coord.x
+    let newy = ev.offsetY - mouse_coord.y
+
+    if (selectedlogic != '') {
+        draglogic(newx, newy)
+    }
+
+    if (ismousedown) {
+        mousedrag = true
+    }
+    selectedline = mouseinline()
+    mouse_coord = {
+        x: ev.offsetX,
+        y: ev.offsetY
+    }
+}
+
+function movelogic(array, x, y) {
+    for (let mm = 0; mm < array.length; mm++) {
+        const elm = array[mm];
+        elm.location = { x: elm.location.x + x, y: elm.location.y + y }
+        updateboundrect(elm)
+    }
+}
+
+function draglogic(newx, newy) {
+
+    movelogic(selectedlogic, newx, newy)
+
+    match = getvertlines(selectedlogic[0])
+}
+
+function edgesnap(vertical, horizontal) {
+
+    if (vertical != '') {
+        for (let x = 0; x < vertical.length; x++) {
+            let elm = vertical[x]
+            if (Math.abs(elm.x - elm.pos[1].left) < 5) {
+                movelogic(selectedlogic, elm.x - elm.pos[1].left, 0)
+                break
+            } else if (Math.abs(elm.x - elm.pos[1].right) < 5) {
+                movelogic(selectedlogic, elm.x - elm.pos[1].right, 0)
+                break
+            }
+        }
+
+    } if (horizontal != '') {
+        for (let y = 0; y < horizontal.length; y++) {
+            let elm = horizontal[y]
+            if (Math.abs(elm.y - elm.pos[1].top) < 5) {
+                movelogic(selectedlogic, 0, elm.y - elm.pos[1].top)
+                break
+            } else if (Math.abs(elm.y - elm.pos[1].bottom) < 5) {
+                movelogic(selectedlogic, 0, elm.y - elm.pos[1].bottom)
+                break
+            }
+        }
+
+    }
+}
+
+function drawlinematch(params) {
+    let [vertical, horizontal] = params
+
+    //use a for loop and add math.floor
+    edgesnap(vertical, horizontal)
+
+    for (let vv = 0; vv < vertical.length; vv++) {
+        const elm = vertical[vv];
+        let x = elm.x
+        let [y1, y2] = (Math.min(elm.pos[0].top, elm.pos[1].top) == elm.pos[0].top) ? [elm.pos[0].bottom, elm.pos[1].top] : [elm.pos[1].bottom, elm.pos[0].top];
+        drawlinem(x, y1, x, y2, [10, 2], 'red')
+    }
+    for (let hh = 0; hh < horizontal.length; hh++) {
+        const elm = horizontal[hh];
+        let y = elm.y
+        let [x1, x2] = (Math.min(elm.pos[0].left, elm.pos[1].left) == elm.pos[0].left) ? [elm.pos[0].right, elm.pos[1].left] : [elm.pos[1].right, elm.pos[0].left];
+        drawlinem(x1, y, x2, y, [10, 2], 'red')
+    }
+}
+
+//rewrite
+function getvertlines(logic) {//add 5 mark range
+    let vertical = []
+    let horizontal = []
+
+    let leftrightmid = Math.floor((logic.left + logic.right) / 2)
+
+    let topbottommid = Math.floor((logic.top + logic.bottom) / 2)
+
+    for (let ll = 0; ll < canvaslogic.length; ll++) {
+        const elm = canvaslogic[ll];
+        let off = 3
+
+        let elm_horizmid = Math.floor((elm.right + elm.left) / 2)
+
+        let elm_vertimid = Math.floor((elm.bottom + elm.top) / 2)
+
+        if (Math.abs(elm.left - logic.left) < off || Math.abs(elm.left - logic.right) < off ||
+            Math.abs(leftrightmid - elm.left) < off) {
+            vertical.push({
+                pos: [elm, logic],
+                x: elm.left,
+            })
+        }
+        if (Math.abs(elm_horizmid - logic.left) < off || Math.abs(elm_horizmid - logic.right) < off ||
+            Math.abs(elm_horizmid - leftrightmid) < off) {
+            vertical.push({
+                pos: [elm, logic],
+                x: elm_horizmid,
+            })
+        }
+        if (Math.abs((elm.right) - logic.left) < off || Math.abs(leftrightmid - (elm.right)) < off ||
+            Math.abs((elm.right) - logic.right) < off) {
+            vertical.push({
+                pos: [elm, logic],
+                x: elm.right,
+            })
+        }
+
+
+        if (Math.abs(elm.top - logic.top) < off || Math.abs(elm.top - logic.bottom) < off ||
+            Math.abs(topbottommid - elm.top) < off) {
+            horizontal.push({
+                pos: [elm, logic],
+                y: elm.top,
+            })
+        }
+        if (Math.abs(elm_vertimid - logic.top) < off || Math.abs(elm_vertimid - logic.bottom) < off ||
+            Math.abs(elm_vertimid - topbottommid) < off) {
+            horizontal.push({
+                pos: [elm, logic],
+                y: elm_vertimid,
+            })
+        }
+        if (Math.abs((elm.bottom) - logic.top) < off || Math.abs(topbottommid - (elm.bottom)) < off ||
+            Math.abs((elm.bottom) - logic.bottom) < off) {
+            horizontal.push({
+                pos: [elm, logic],
+                y: elm.bottom,
+            })
+        }
+        // console.log(vertical,horizontal);
+    } return [vertical, horizontal]
+}
+
+function reorderarray(params) {
+    let templogic = canvaslogic[canvaslogic.length - 1]//last element
+    //movelogic selected to the back
+    canvaslogic[canvaslogic.length - 1] = canvaslogic[selectedlogic[0]]
+    canvaslogic[selectedlogic[0]] = templogic
+    selectedlogic = []
+    selectedlogic.push(canvaslogic.pop())
+}
+
+function collidrect(ev, elm) {
+    if (ev.offsetX > elm.location.x && ev.offsetY > elm.location.y &&
+        ev.offsetX < (elm.right) && ev.offsetY < (elm.bottom)) {
+        return true
+    } else {
+        return false
+    }
+}
+
+function collidcircle(x1, y1, x2, y2, rad) {
+    let dx = x2 - x1
+    let dy = y2 - y1
+    let dist = dx * dx + dy * dy//2 *2 + 4*4
+
+    return (dist < (rad * rad)) ? true : false
+}
+//remove for loop and make modular
+function collidline(x1, y1, x2, y2) {
+    context.beginPath()
+    context.lineWidth = 10
+    context.moveTo(x1, y1)
+    context.lineTo(x2, y2)
+    if (context.isPointInStroke(mouse_coord.x, mouse_coord.y)) {
+        return true
+    } else {
+        return false
+
+    }
+}
+function mouseinline(params) {//allow multiple
+
+    let res = []
+    for (let nn = 0; nn < wires.length; nn++) {
+        const elm = wires[nn];
+        let lines = []
+        lines.push([elm.frm.location.x + elm.frm.radius, elm.frm.location.y + elm.to.radius])
+        lines.push(...elm.bridge)
+        lines.push([elm.to.location.x + elm.frm.radius, elm.to.location.y + elm.to.radius])
+        for (let ii = 1; ii < lines.length; ii++) {
+            let [x1, y1] = lines[ii - 1]
+            let [x2, y2] = lines[ii]
+            if (collidline(x1, y1, x2, y2)) {
+                res.push(x1, y1, x2, y2, elm)
+
+            }
+        }
+    } return res
+}
+
+function logicselected(ev) {
+    for (let jj = 0; jj < canvaslogic.length; jj++) {
+        const elm = canvaslogic[jj];
+        if (collidrect(ev, elm)) {
+            selectedlogic = [jj]
+            reorderarray()
+            break
+        }
+    }
+}
+
+function mousedown(ev) {
+    console.log(ev.type);
+    //check chrome bug
+    if (buttonisclick != true) {
+        ismousedown = true
+    }
+    logicselected(ev)
+    // use is dragging
+}
+
+function mouseup(ev) {
+    console.log(ev.type);
+    if (ismousedown) {
+        canvaslogic.push(...selectedlogic)
+        selectedlogic = []
+    }
+    ismousedown = false
+}
+
+function rightclick(ev) {
+    ev.preventDefault()
+    toconnect = { frm: '', bridge: [], to: '' }
+
+
+}
+
+function clickedmouse(ev) {
+    console.log(ev.type);
+    canvaslogic.push(...selectedlogic)
+    selectedlogic = []
+    match = [[], []]
+
+    if (mousedrag == false && buttonisclick == false) {
+        toogleinput(ev)
+        completeconnection(ev)
+
+    }
+
+    buttonisclick = false
+    mousedrag = false
+
+
+}
+// allow editing of line node , draw new wires from existing wire,  
+
+function drawmouseoverline(ary) {
+    if (ary) {
+        drawline(ary[0], ary[1], ary[2], ary[3], [], 'red', 10)
+    }
+}
+
+function completeconnection(ev) {
+    let res = getconnection(ev)
+    if (res) {
+        if (res.name == 'OUT' && toconnect.frm.name != res.name && toconnect.frm == '') {
+            toconnect.frm = res
+        } else if (toconnect.frm.name != res.name && res.name == 'IN' && toconnect.to == '') {
+            toconnect.to = res
+        }
+    }
+    //make sure it not under any logic
+    if (res == '' && selectedline == '' && !canvaslogic.some((gate) => collidrect(ev, gate))) {
+        if (toconnect.frm) {
+            toconnect.bridge.push([ev.offsetX, ev.offsetY])
+        } else if (toconnect.to) {
+            toconnect.bridge = toconnect.bridge.reverse()
+            toconnect.bridge.push([ev.offsetX, ev.offsetY])
+            toconnect.bridge = toconnect.bridge.reverse()
+        }
+    }
+    if (res == '' && selectedline != '') {
+        if (toconnect.frm) {//make sure it connect to mutiple wire whn it has mutilpe
+            toconnect.bridge.push([ev.offsetX, ev.offsetY])
+
+            updatebridge(selectedline[4].bridge, [selectedline[2], selectedline[3]], frm = true)
+            toconnect.to = selectedline[4].to
+        } else if (toconnect.to) {
+            toconnect.frm = selectedline[4].frm
+            let temp = toconnect.bridge
+            toconnect.bridge = []
+            updatebridge(selectedline[4].bridge, [selectedline[0], selectedline[1]],)
+            toconnect.bridge.push([ev.offsetX, ev.offsetY])
+            toconnect.bridge.push(...temp)
+        } else if (toconnect.to == '' && toconnect.frm == '') {
+            toconnect.frm = selectedline[4].frm
+            updatebridge(selectedline[4].bridge, [selectedline[0], selectedline[1]],)
+            toconnect.bridge.push([ev.offsetX, ev.offsetY])
+        }
+    }
+    if (toconnect.frm && toconnect.to) {
+        connectlogic()
+        evaluateconnections(canvaslogic)
+        wires.push(cloneobj(toconnect))
+        console.log(toconnect);
+        toconnect = { frm: '', bridge: [], to: '' }
+        console.log(canvaslogic);
+    }
+}
+function connectlogic() {
+    console.log(toconnect.frm.connectedto);
+    toconnect.frm.connectedto.push(toconnect.to)
+}
+
+function evaluateconnections(array) {
+    console.log(array);
+    let gates = array.filter(pin => pin.name == 'IN')
+    let outpins = []
+
+    if (gates == '') {
+        gates = array
+    }
+
+    gates.forEach(pin => outpins.push(...pin.outpin))
+    let newarray = []
+    let logics = canvaslogic.filter(pin => pin.name == 'NOT' || pin.name == 'AND')
+
+    for (let xx = 0; xx < outpins.length; xx++) {
+        let connections = outpins[xx].connectedto
+        for (let cc = 0; cc < connections.length; cc++) {
+            connections[cc].state = outpins[xx].state
+
+            let res = logics.filter(logic => logic.inpin.some(pin => pin == connections[cc]))
+            console.log(res);
+            if (gates.every(logic => logic != res[0]) && newarray.every(logic => logic != res[0]) && res != '') newarray.push(res[0])
+            //[234]3 //0 1 0 //1 0 1
+
+        }
+    }
+    evaluateboolean(canvaslogic)
+    if (newarray != '') evaluateconnections(newarray)
+}
+
+function evaluateboolean(array) {
+    let gates = array.filter(gate => gate.name == 'AND' || gate.name == 'NOT')
+    for (let gg = 0; gg < gates.length; gg++) {
+        const key = gates[gg].name
+        switch (key) {
+            case 'AND':
+                AND(gates[gg])
+                break;
+            case 'NOT':
+                NOT(gates[gg])
+                break;
+            default:
+                break;
+        }
+    }
+
+}
+function AND(gate) {
+    //if (gate.inpin[0].state != '' && gate.inpin[1].state != '') {
+    gate.outpin[0].state = (gate.inpin[0].state == 1 && gate.inpin[1].state == 1) ? 1 : 0;
+    //}
+}
+function NOT(gate) {
+    //console.log(gate.inpin[0].state,gate.outpin[0].state,(0 == ''));
+    //if (gate.inpin[0].state != '') {
+    gate.outpin[0].state = (gate.inpin[0].state == 1) ? 0 : 1;
+    console.log(gate.inpin[0].state, gate.outpin[0].state);
+    //}
+}
+
+function updatebridge(array, elm, frm = false) {
+    let start = array.findIndex(e => e[0] == elm[0] && e[1] == elm[1])
+
+    let x = 0
+    let end = 0
+    if (frm) {
+        x = start
+        end = array.length
+    } else {
+        end = start + 1
+    }
+    console.log(start, frm, x, end);
+    if (start >= 0) {
+        for (x; x < end; x++) {
+            toconnect.bridge.push(array[x])
+        }
+    }
+}
+
+function cloneobj(obj) {
+    let res = { frm: '', bridge: [], to: '' }
+    res.frm = obj.frm
+    res.bridge = obj.bridge
+    res.to = obj.to
+    return res
+}
+
+function drawwires(wires) {
+    // console.log(toconnect);
+    drawwire(toconnect)
+    for (let ww = 0; ww < wires.length; ww++) {
+        drawwire(wires[ww])
+    }
+
+}
+
+function drawwire(obj) {
+
+    let array = []
+
+    if (obj.frm != '') {
+        let [lx, ly] = [obj.frm.location.x + obj.frm.radius, obj.frm.location.y + obj.frm.radius]
+        array.push([lx, ly])
+        if (obj.bridge != '') {
+            array.push(...obj.bridge)
+        } if (obj.to == '') {
+            array.push([mouse_coord.x, mouse_coord.y])
+        }
+        if (obj.to != '') {
+            let [lx, ly] = [obj.to.location.x + obj.to.radius, obj.to.location.y + obj.to.radius]
+            array.push([lx, ly])
+        }
+
+    } else if (obj.to != '') {
+        let [lx, ly] = [obj.to.location.x + obj.to.radius, obj.to.location.y + obj.to.radius]
+
+        if (obj.frm == '') {
+            array.push([mouse_coord.x, mouse_coord.y])
+        } if (obj.bridge != '') {
+            array.push(...obj.bridge)
+        }
+
+        array.push([lx, ly])
+    }
+    drawwireandnodes(array)
+}
+
+function drawwireandnodes(array) {
+
+    if (array.length > 1) {
+        for (let ll = 1; ll < array.length; ll++) {
+            const ln = array[ll - 1]
+            const ln1 = array[ll];
+            drawline(ln[0], ln[1], ln1[0], ln1[1], [], 'black', 5)
+        }
+        lineNodes.push(array)
+    }
+}
+
+function breakpoint(array) {
+    for (let cc = 0; cc < array.length; cc++) {
+        const coords = array[cc];
+        for (let xx = 1; xx < coords.length - 1; xx++) {
+            const coord = coords[xx];
+            if (collidcircle(coord[0], coord[1], mouse_coord.x, mouse_coord.y, 3)) {
+                drawcircle(coord[0], coord[1], 5, 'red', 'red')
+            } else {
+                drawcircle(coord[0], coord[1], 5, 'white', 'white')
+            }
+        }
+    }
+}
+
+function toogleinput(ev) {
+    for (let cc = 0; cc < canvaslogic.length; cc++) {
+        const elm = canvaslogic[cc];
+        let cx = elm.location.x + elm.radius
+        let cy = elm.location.y + elm.radius
+
+        if (elm.name == "IN" && collidcircle(cx, cy, ev.offsetX, ev.offsetY, elm.radius)) {
+
+            elm.state = (elm.state == 0) ? 1 : 0;
+            elm.outpin[0].state = elm.state
+            evaluateconnections(canvaslogic)
+            break;
+        }
+    }
+}
+
+function getconnection(ev) {
+    let res = ''
+    for (let gg = 0; gg < canvaslogic.length; gg++) {
+        let outpin = canvaslogic[gg].outpin
+        let inpin = canvaslogic[gg].inpin
+
+        if (outpin != undefined) {
+            for (let hh = 0; hh < outpin.length; hh++) {
+                const elm = outpin[hh];
+                let cx = elm.location.x + elm.radius
+                let cy = elm.location.y + elm.radius
+                if (collidcircle(cx, cy, ev.offsetX, ev.offsetY, elm.radius)) {
+                    res = elm
+                    return res
+                }
+            }
+        }
+
+        if (inpin != undefined) {
+            for (let hh = 0; hh < inpin.length; hh++) {
+                const elm = inpin[hh];
+                let cx = elm.location.x + elm.radius
+                let cy = elm.location.y + elm.radius
+                if (collidcircle(cx, cy, ev.offsetX, ev.offsetY, elm.radius)) {
+                    res = elm
+                    return res
+                }
+            }
+        }
+
+    }
+    return res
+}
+
+function getcanvasarea() {
+
+    let area = section.getBoundingClientRect()
+    canvas.setAttribute('width', `${section.offsetWidth - 40}px`)
+    canvas.setAttribute('height', `${section.offsetHeight}px`)
+    drawwires(wires)
+    repaintlogic(canvaslogic)
+    repaintlogic(selectedlogic)
+    //drawline(50, 10, 50, 50)
+}
+getcanvasarea()
+
+function update() {
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+
+    drawmouseoverline(selectedline)
+    drawwires(wires)
+    repaintlogic(canvaslogic)
+    repaintlogic(selectedlogic)
+    drawlinematch(match)
+    breakpoint(lineNodes)
+    lineNodes = []
+    requestAnimationFrame(update)
+}
+update()
