@@ -1,6 +1,6 @@
 let body = document.getElementsByTagName('body')[0]
 let cnvs = document.getElementById('canvas')
-let cnt = canvas.getcnt('2d')
+let cnt = canvas.getContext('2d')
 let section = document.getElementsByTagName('section')[0]
 let button_click = false
 let is_mouse_down = false
@@ -15,6 +15,33 @@ let node_selected = []
 // let selectedline = []
 // let lineNodes = []
 // let toconnect = { frm: '', to: '', bridge: [] }
+
+let logics = document.getElementsByClassName('box')
+for (const logic of logics) {
+    logic.addEventListener('click', insert_node)
+}
+
+function insert_node(ev) {
+    if (button_click && node_selected != '' && node_selected[0].name != ev.target.innerText) {
+        node_selected = []
+
+    }
+
+    button_click = true
+
+    let area = ev.target.getBoundingClientRect()
+    let canvasarea = canvas.getBoundingClientRect()
+
+    let [x, y] = [0, area.y - canvasarea.y]
+    let name = ev.target.innerText
+
+    mouse_pos = { x: x, y: y }//storing to preventing jumping
+
+    if (ev.target.innerText == 'AND') node_selected.push(new AND(x, y))
+    if (ev.target.innerText == 'NOT') node_selected.push(new NOT(x, y))
+
+    // arrangelogic(selectedlogic, x)
+}
 
 class NODE {
     constructor(x, y, name, fill, stroke) {
@@ -40,9 +67,11 @@ class NODE {
     }
 }
 class PIN extends NODE {
-    constructor(x, y, fill = 'blue', stroke = 'grey') {
+    constructor(x, y, r, fill = 'blue', stroke = 'grey') {
         super(x, y, 'INPUT', fill, stroke)
         this.connected = []
+        this.state = 0
+        this.r = r
         this.outpin = []
     }
 }
@@ -50,6 +79,8 @@ class PIN extends NODE {
 class AND extends NODE {
     constructor(x, y, fill = 'brown', stroke = 'grey') {
         super(x, y, 'AND', fill, stroke)
+        this.w = 0
+        this.h = 0
         this.inpin = []
         this.outpin = []
         this.init(2, 1)
@@ -65,7 +96,7 @@ class NOT extends NODE {
 }
 
 class CANVAS {
-    draw_circle = (x,y,r,fill,stroke) => {
+    draw_circle = (x, y, r, fill, stroke) => {
         cnt.lineWidth = 1
         cnt.beginPath()
         cnt.strokeStyle = stroke
