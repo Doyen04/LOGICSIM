@@ -1,10 +1,12 @@
 let body = document.getElementsByTagName('body')[0]
 let cnvs = document.getElementById('canvas')
-let cnt = canvas.getContext('2d')
+let cnt = cnvs.getContext('2d')
 let section = document.getElementsByTagName('section')[0]
+
 let button_click = false
 let is_mouse_down = false
 let mouse_drag = false
+
 let mouse_pos = { x: 0, y: 0 }
 let gap = 10
 // let mousedist = 0
@@ -23,24 +25,93 @@ cnvs.addEventListener('mouseup', handle_mouse_up)
 cnvs.addEventListener('contextmenu', handle_right_click)
 window.addEventListener('resize', handle_window_resize)
 
-function handle_mouse_move(params) {
+function handle_mouse_move(ev) {
+
+    let newx = ev.offsetX - mouse_pos.x
+    let newy = ev.offsetY - mouse_pos.y
+    if (node_selected != '') {
+        drag_logic(newx, newy)
+    }
+
+    if (is_mouse_down) {
+        mouse_drag = true
+    }
+    // selectedline = mouseinline()
+    mouse_pos = {
+        x: ev.offsetX,
+        y: ev.offsetY
+    }
+}
+
+function handle_click(ev) {
+    console.log(ev.type);
+    node_list.push(...node_selected)
+    node_selected = []
+    // match = [[], []]
+
+    if (mouse_drag == false && button_click == false) {
+        // toogleinput(ev)
+        // completeconnection(ev)
+    }
+    button_click = false
+    mouse_drag = false
+
+}
+function select_node(ev) {
+    node_list.forEach(node => {
+        if (node.collide(ev.offsetX, ev.offsetY)) node_selected.push(node)
+    })
+}
+function handle_mouse_down(ev) {
+    console.log(ev.type);
+    //check chrome bug
+    if (button_click != true) {
+        is_mouse_down = true
+    }
+    if (ev.button == 0) select_node(ev)
+    // use is dragging
 
 }
 
-function handle_click(params) {
-
+function handle_node_right_click(ev) {
+    let clicked_node = ''
+    node_list.forEach(node => {
+        if (node.collide(ev.offsetX, ev.offsetY)) {
+            let pop_elm = document.getElementsByClassName('pop-up')[0]
+            pop_elm.style.left = `${ev.x + 5}px`
+            pop_elm.style.top = `${ev.y}px`
+            pop_elm.style.display = 'flex'
+            pop_elm.addEventListener('click', handle_pop_up_click)
+            clicked_node = node
+        }
+    })
+    function handle_pop_up_click(ev) {
+        if (ev.target.innerText == 'DELETE') {
+            console.log(node_list.length);
+            let index = node_list.indexOf(clicked_node)
+            node_list[index] = node_list[node_list.length - 1]
+            node_list.pop()
+        } else {
+            console.log(ev.target.innerText);
+        }
+        document.getElementsByClassName('pop-up')[0].style.display = 'none'
+    }
 }
 
-function handle_mouse_down(params) {
-
+function handle_mouse_up(ev) {
+    console.log(ev.type);
+    if (is_mouse_down) {
+        node_list.push(...node_selected)
+        node_selected = []
+    }
+    is_mouse_down = false
 }
 
-function handle_mouse_up(params) {
-
-}
-
-function handle_right_click(params) {
-
+function handle_right_click(ev) {
+    ev.preventDefault()
+    console.log(ev.type);
+    // toconnect = { frm: '', bridge: [], to: '' }
+    handle_node_right_click(ev)
 }
 
 function handle_window_resize(ev) {
@@ -66,17 +137,29 @@ function insert_node(ev) {
     let area = ev.target.getBoundingClientRect()
     let canvasarea = canvas.getBoundingClientRect()
 
-    let [x, y] = [0, area.y - canvasarea.y]
-    let name = ev.target.innerText
-
-    mouse_pos = { x: x, y: y }//storing to preventing jumping
+    let [x, y] = [0, get_new_y(area.y - canvasarea.y)]
+    console.log(mouse_pos);
+    
+    mouse_pos = { x: x, y: (mouse_pos.y == 0) ? y : mouse_pos.y }//storing to preventing jumping
 
     if (ev.target.innerText == 'AND') node_selected.push(new AND(x, y))
     if (ev.target.innerText == 'NOT') node_selected.push(new NOT(x, y))
 
-    // arrangelogic(selectedlogic, x)
+    // arrangelogic(selectedlogic, x
+}
+const get_new_y = (y) => {
+    let last_node = y
+    node_selected.forEach((node, x) => {
+        last_node = node.bottom + (gap)
+    })
+    return last_node
 }
 
+const drag_logic = (cx, cy) => {
+    node_selected.forEach(node => {
+        node.move(cx, cy)
+    })
+}
 class NODE {
     constructor(x, y, name, fill, stroke) {
         this.name = name
@@ -89,6 +172,20 @@ class NODE {
         this.right = 0
         this.stroke = stroke
         this.fill = fill
+    }
+    collide = (cx, cy) => {
+        if (cx > this.x && cy > this.y &&
+            cx < (this.right) && cy < (this.bottom)) {
+            return true
+        } else {
+            return false
+        }
+    }
+    move = (cx, cy) => {
+        this.x += cx
+        this.y += cy
+        this.calculate_bounding_rect()
+        this.calculate_pin_pos(this.inpin.length, this.outpin.length, 6)
     }
     calculate_bounding_rect = () => {
         this.bottom = Math.floor(this.y + this.h)
@@ -107,15 +204,14 @@ class NODE {
         //touch this
         this.w = 80
         this.h = 40
-        this.calculate_pin_pos(inpin_len, outpin_len, r)
         this.calculate_bounding_rect()
-        this.
+        this.calculate_pin_pos(inpin_len, outpin_len, r)
         this.draw()
     }
     calculate_pin_pos = (inpin_len, outpin_len, r) => {
         let in_y = this.space_evenly(this.y, (this.y + this.h), inpin_len, r)
         let out_y = this.space_evenly(this.y, (this.y + this.h), outpin_len, r)
-        console.log(in_y);
+
         this.inpin.forEach((pin, x) => {
             pin.x = this.x
             pin.y = in_y[x]
@@ -169,8 +265,10 @@ class AND extends NODE {
     }
 }
 class NOT extends NODE {
-    constructor(x, y, fill = 'brown', stroke = 'grey') {
-        super(x, y, 'AND', fill, stroke)
+    constructor(x, y, fill = 'green', stroke = 'indigo') {
+        super(x, y, 'NOT', fill, stroke)
+        this.w = 0
+        this.h = 0
         this.inpin = []
         this.outpin = []
         this.init(1, 1)
@@ -219,3 +317,16 @@ class CANVAS {
     }
 }
 
+
+const render = () => {
+    cnt.clearRect(0, 0, cnt.canvas.width, cnt.canvas.height)
+
+    node_list.forEach(node => {
+        node.draw()
+    })
+    node_selected.forEach(node => {
+        node.draw()
+    })
+    requestAnimationFrame(render)
+}
+render()

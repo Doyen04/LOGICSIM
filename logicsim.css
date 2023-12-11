@@ -84,3 +84,28 @@ footer{
     background-color: rgb(27, 27, 44);
 
 }
+.pop-up{
+    width: 80px;
+    height: 50px;
+    position: absolute;
+    background-color: grey;
+    border-radius: 2px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    font-family: cursive;
+    font-size: 12;
+}
+.pop-up > div{
+    border: 2px solid lightgrey;
+    width: 100%;
+    text-align: center;
+    -webkit-user-select: none;
+    user-select: none;
+    height: 50%;
+}
+.pop-up > div:hover{
+    background-color: #58c;
+    font-weight: bold;
+}
