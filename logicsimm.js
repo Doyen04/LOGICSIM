@@ -134,17 +134,16 @@ function insert_node(ev) {
 
     button_click = true
 
-    let area = ev.target.getBoundingClientRect()
-    let canvasarea = canvas.getBoundingClientRect()
+    let side_bar = ev.target.getBoundingClientRect()
+    let canvas_area = cnvs.getBoundingClientRect()
 
-    let [x, y] = [0, get_new_y(area.y - canvasarea.y)]
-    console.log(mouse_pos);
-    
-    mouse_pos = { x: x, y: (mouse_pos.y == 0) ? y : mouse_pos.y }//storing to preventing jumping
+    let [x, y] = [0, get_new_y(side_bar.y - canvas_area.y)]
+
+    mouse_pos = { x: x, y: side_bar.y - canvas_area.y }//storing to preventing jumping
 
     if (ev.target.innerText == 'AND') node_selected.push(new AND(x, y))
     if (ev.target.innerText == 'NOT') node_selected.push(new NOT(x, y))
-
+    if (ev.target.innerText == 'IN') node_selected.push(new INPUT(x, y))
     // arrangelogic(selectedlogic, x
 }
 const get_new_y = (y) => {
@@ -274,6 +273,48 @@ class NOT extends NODE {
         this.init(1, 1)
     }
 }
+class INPUT extends NODE {
+    constructor(x, y, name = 'INPUT', fill = 'blue', stroke = 'white') {
+        super(x, y, name, fill, stroke)
+        this.state = 0
+        this.r = 20
+        this.gap = 40
+        this.outlet = ''
+        this.outlet_pos()
+    }
+    outlet_pos = () => {
+        let x = this.x + this.gap
+        let y = this.y
+        this.outlet = new PIN(x, y, 6, '', this.fill, this.stroke)
+    }
+    draw = () => {
+        let new_cnvs = new CANVAS
+        let sc = this.outlet
+        new_cnvs.draw_circle(this.x, this.y, this.r, this.fill, this.stroke)
+        new_cnvs.draw_line((this.x + (this.gap / 2)), this.y, sc.x, this.y, [], this.fill, 1)
+
+        new_cnvs.draw_circle(sc.x, sc.y, sc.r, sc.fill, sc.stroke)
+    }
+    calculate_bounding_rect = () => {
+        this.bottom = Math.floor(this.y + this.r)
+        this.top = Math.floor(this.y - this.r)
+        this.left = Math.floor(this.x - this.r)
+        this.right = Math.floor(this.x + this.r)
+    }
+    move = (cx, cy) => {
+        this.x += cx
+        this.y += cy
+        this.calculate_bounding_rect()
+        this.outlet_pos()
+    }
+    collide = (cx, cy) => {
+        let dx = cx - this.x
+        let dy = cy - this.y
+        let dist = dx * dx + dy * dy//2 *2 + 4*4
+
+        return (dist < (this.r * this.r)) ? true : false
+    }
+}
 
 class CANVAS {
     draw_circle = (x, y, r, fill, stroke, lwidth) => {
@@ -305,7 +346,7 @@ class CANVAS {
         cnt.fillText(name, x + ((w - text.width) / 2), y + ((h + textheight) / 2));
         cnt.stroke()
     }
-    drawline = (x1, y1, x2, y2, pattern, stroke, lwidth) => {
+    draw_line = (x1, y1, x2, y2, pattern, stroke, lwidth) => {
         cnt.beginPath()
 
         cnt.moveTo(x1, y1)
