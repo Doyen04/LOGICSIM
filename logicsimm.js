@@ -14,9 +14,9 @@ let gap = 10
 let wires = []
 let node_list = []
 let node_selected = []
-// let selectedline = []
+let line_selected = { start_pos: [], end_pos: [], node: '' }
 // let lineNodes = []
-// let toconnect = { frm: '', to: '', bridge: [] }
+let temp_connect = { out_node: '', in_node: '', connector: [] }
 
 cnvs.addEventListener('mousemove', handle_mouse_move)
 cnvs.addEventListener('click', handle_click)
@@ -24,45 +24,68 @@ cnvs.addEventListener('mousedown', handle_mouse_down)
 cnvs.addEventListener('mouseup', handle_mouse_up)
 cnvs.addEventListener('contextmenu', handle_right_click)
 window.addEventListener('resize', handle_window_resize)
+window.addEventListener('keypress',handle_key_press)
 
+let temp_canvas_class = null
 function handle_mouse_move(ev) {
-
     let newx = ev.offsetX - mouse_pos.x
     let newy = ev.offsetY - mouse_pos.y
     if (node_selected != '') {
         drag_logic(newx, newy)
     }
 
-    if (is_mouse_down) {
+    if (is_mouse_down && ev.movementX != 0 && ev.movementY != 0) {
         mouse_drag = true
     }
-    // selectedline = mouseinline()
+    if (temp_canvas_class == null) temp_canvas_class = new CANVAS
+    line_selected = temp_canvas_class.get_line_collision()
     mouse_pos = {
         x: ev.offsetX,
         y: ev.offsetY
     }
 }
-
-function handle_click(ev) {
-    console.log(ev.type);
-    node_list.push(...node_selected)
-    node_selected = []
-    // match = [[], []]
-
-    if (mouse_drag == false && button_click == false) {
-        // toogleinput(ev)
-        // completeconnection(ev)
-    }
-    button_click = false
-    mouse_drag = false
-
-}
-function select_node(ev) {
+function toogle_input(ev) {
+    console.log(node_list);
     node_list.forEach(node => {
-        if (node.collide(ev.offsetX, ev.offsetY)) node_selected.push(node)
+        if (node.collide(ev.offsetX, ev.offsetY) && node.name == 'INPUT') {
+            node.toogle_state()
+            console.log("node clicked :", node);
+        }
     })
 }
+function handle_click(ev) {
+    console.log(is_mouse_down, mouse_drag, node_list);
+    console.log(ev.type);
+    if (mouse_drag || button_click) {
+        node_list.push(...node_selected)
+        node_selected = []
+    }
+    node_selected = []
+    if (mouse_drag == false && button_click == false) {
+        toogle_input(ev)
+        create_connection(ev)
+    }
+    document.getElementsByClassName('pop-up')[0].style.display = 'none'
+    button_click = false
+    mouse_drag = false
+}
+function select_node(ev) {
+    let indx = -1
+    let s_node = ''
+    node_list.forEach((node, index) => {
+        if (node.collide(ev.offsetX, ev.offsetY)) {
+            indx = index
+            s_node = node
+        }
+    })
+    if (indx != -1) {
+        node_list[indx] = node_list[node_list.length - 1]
+        node_list.pop()
+        node_selected.push(s_node)
+    }
+}
 function handle_mouse_down(ev) {
+    console.log(is_mouse_down, mouse_drag, node_list);
     console.log(ev.type);
     //check chrome bug
     if (button_click != true) {
@@ -72,45 +95,49 @@ function handle_mouse_down(ev) {
     // use is dragging
 
 }
-
+let index = -1
+//remove delected from wire
+//and from connected elem
+function handle_pop_up_click(ev) {
+    if (ev.target.innerText == 'DELETE') {
+        node_list[index] = node_list[node_list.length - 1]
+        node_list.pop()
+    } else {
+        console.log(ev.target.innerText);
+    }
+    let pop_elm = document.getElementsByClassName('pop-up')[0]
+    pop_elm.removeEventListener('click', handle_node_right_click)
+    pop_elm.style.display = 'none'
+}
 function handle_node_right_click(ev) {
-    let clicked_node = ''
-    node_list.forEach(node => {
+    let pop_elm = document.getElementsByClassName('pop-up')[0]
+    pop_elm.addEventListener('click', handle_pop_up_click)
+
+    node_list.forEach((node, x) => {
         if (node.collide(ev.offsetX, ev.offsetY)) {
-            let pop_elm = document.getElementsByClassName('pop-up')[0]
             pop_elm.style.left = `${ev.x + 5}px`
             pop_elm.style.top = `${ev.y}px`
             pop_elm.style.display = 'flex'
-            pop_elm.addEventListener('click', handle_pop_up_click)
-            clicked_node = node
+            index = x
         }
     })
-    function handle_pop_up_click(ev) {
-        if (ev.target.innerText == 'DELETE') {
-            console.log(node_list.length);
-            let index = node_list.indexOf(clicked_node)
-            node_list[index] = node_list[node_list.length - 1]
-            node_list.pop()
-        } else {
-            console.log(ev.target.innerText);
-        }
-        document.getElementsByClassName('pop-up')[0].style.display = 'none'
-    }
 }
 
 function handle_mouse_up(ev) {
+    console.log(is_mouse_down, mouse_drag, node_list);
     console.log(ev.type);
-    if (is_mouse_down) {
-        node_list.push(...node_selected)
-        node_selected = []
-    }
+    // if (is_mouse_down && mouse_drag) {
+    node_list.push(...node_selected)
+    node_selected = []
+    // }
     is_mouse_down = false
+    console.log(is_mouse_down);
 }
 
 function handle_right_click(ev) {
     ev.preventDefault()
     console.log(ev.type);
-    // toconnect = { frm: '', bridge: [], to: '' }
+    temp_connect = { in_node: '', connector: [], out_node: '' }
     handle_node_right_click(ev)
 }
 
@@ -121,13 +148,21 @@ function handle_window_resize(ev) {
 }
 handle_window_resize()
 
+function handle_key_press(ev){
+    ev.preventDefault()
+    if (ev.ctrlKey && ev.key == 's') {
+        alert(4444)
+    }
+    console.log(ev);
+}
+
 let logics = document.getElementsByClassName('box')
 for (const logic of logics) {
     logic.addEventListener('click', insert_node)
 }
 
 function insert_node(ev) {
-    if (button_click && node_selected != '' && node_selected[0].name != ev.target.innerText) {
+    if (button_click && node_selected != '' && (node_selected[0].name != ev.target.innerText)) {
         node_selected = []
 
     }
@@ -143,13 +178,18 @@ function insert_node(ev) {
 
     if (ev.target.innerText == 'AND') node_selected.push(new AND(x, y))
     if (ev.target.innerText == 'NOT') node_selected.push(new NOT(x, y))
-    if (ev.target.innerText == 'IN') node_selected.push(new INPUT(x, y))
+    if (ev.target.innerText == 'INPUT') node_selected.push(new INPUT(x, y))
+    if (ev.target.innerText == 'OUTPUT') node_selected.push(new OUTPUT(x, y))
     // arrangelogic(selectedlogic, x
 }
 const get_new_y = (y) => {
     let last_node = y
     node_selected.forEach((node, x) => {
-        last_node = node.bottom + (gap)
+        if (node.name == ('INPUT') || node.name == ('OUTPUT')) {
+            last_node = node.bottom + (gap * 3)
+        } else {
+            last_node = node.bottom + (gap)
+        }
     })
     return last_node
 }
@@ -195,10 +235,10 @@ class NODE {
     init = (inpin_len, outpin_len) => {
         let r = 6
         for (let x = 0; x < inpin_len; x++) {
-            this.inpin.push(new PIN(0, 0, r, 'IN', this.fill, this.stroke,))
+            this.inpin.push(new PIN(this, 0, 0, r, 'IN', this.fill, this.stroke,))
         }
         for (let x = 0; x < outpin_len; x++) {
-            this.outpin.push(new PIN(0, 0, r, 'OUT', this.fill, this.stroke,))
+            this.outpin.push(new PIN(this, 0, 0, r, 'OUT', this.fill, this.stroke,))
         }
         //touch this
         this.w = 80
@@ -244,12 +284,20 @@ class NODE {
     }
 }
 class PIN extends NODE {
-    constructor(x, y, r, name, fill = 'blue', stroke = 'grey') {
+    constructor(parent, x, y, r, name, fill = 'blue', stroke = 'grey') {
         super(x, y, name, fill, stroke)
-        this.connected = []
+        this.parent = parent
+        this.connected_nodes = []
         this.state = 0
         this.r = r
         this.outpin = []
+    }
+    collide = (cx, cy) => {
+        let dx = cx - this.x
+        let dy = cy - this.y
+        let dist = dx * dx + dy * dy//2 *2 + 4*4
+
+        return (dist < ((this.r + 5) * (this.r + 5))) ? true : false
     }
 }
 
@@ -260,7 +308,12 @@ class AND extends NODE {
         this.h = 0
         this.inpin = []
         this.outpin = []
+        this.is_evaluated = false
         this.init(2, 1)
+    }
+    evaluate = () => {
+        this.outpin[0].state = (this.inpin[0].state == 1 && this.inpin[1].state == 1) ? 1 : 0;
+        console.log('and', this.outpin[0].state);
     }
 }
 class NOT extends NODE {
@@ -270,7 +323,12 @@ class NOT extends NODE {
         this.h = 0
         this.inpin = []
         this.outpin = []
+        this.is_evaluated = false
         this.init(1, 1)
+    }
+    evaluate = () => {
+        this.outpin[0].state = (this.inpin[0].state == 0) ? 1 : 0;
+        console.log('not', this.outpin[0].state);
     }
 }
 class INPUT extends NODE {
@@ -280,20 +338,37 @@ class INPUT extends NODE {
         this.r = 20
         this.gap = 40
         this.outlet = ''
+        this.init()
+    }
+    toogle_state = () => {
+        this.state = (this.state == 0) ? 1 : 0;
+        console.log(this.state);
+        this.fill = (this.state == 0) ? 'blue' : 'red';
+        this.outlet.state = this.state
+        evaluate_node_list()
+        reset_node_evaluation_state()
+        evaluate_node_list()
+        reset_node_evaluation_state()
+    }
+    init = () => {
+        this.outlet = new PIN(this, 0, 0, 6, 'OUTLET', this.fill, this.stroke)
         this.outlet_pos()
+        this.calculate_bounding_rect()
+        this.draw()
     }
     outlet_pos = () => {
         let x = this.x + this.gap
         let y = this.y
-        this.outlet = new PIN(x, y, 6, '', this.fill, this.stroke)
+        this.outlet.x = x
+        this.outlet.y = y
     }
     draw = () => {
         let new_cnvs = new CANVAS
         let sc = this.outlet
-        new_cnvs.draw_circle(this.x, this.y, this.r, this.fill, this.stroke)
+        new_cnvs.draw_circle(this.x, this.y, this.r, this.fill, this.stroke, 1)
         new_cnvs.draw_line((this.x + (this.gap / 2)), this.y, sc.x, this.y, [], this.fill, 1)
 
-        new_cnvs.draw_circle(sc.x, sc.y, sc.r, sc.fill, sc.stroke)
+        new_cnvs.draw_circle(sc.x, sc.y, sc.r, sc.fill, sc.stroke, 1)
     }
     calculate_bounding_rect = () => {
         this.bottom = Math.floor(this.y + this.r)
@@ -315,10 +390,90 @@ class INPUT extends NODE {
         return (dist < (this.r * this.r)) ? true : false
     }
 }
+class OUTPUT extends NODE {
+    constructor(x, y, name = 'OUTPUT', fill = 'blue', stroke = 'white') {
+        super(x, y, name, fill, stroke)
+        this.state = 0
+        this.r = 20
+        this.gap = 40
+        this.inlet = ''
+        this.init()
+    }
+    init = () => {
+        this.inlet = new PIN(this, 0, 0, 6, 'INLET', this.fill, this.stroke)
+        this.inlet_pos()
+        this.calculate_bounding_rect()
+        this.draw()
+    }
+    inlet_pos = () => {
+        let x = this.x - this.gap
+        let y = this.y
+        this.inlet.x = x
+        this.inlet.y = y
 
+    }
+    draw = () => {
+        let new_cnvs = new CANVAS
+        let sc = this.inlet
+        this.state = sc.state
+        let fill = (this.state == 0) ? 'blue' : 'red';
+        new_cnvs.draw_line(this.x, this.y, sc.x, this.y, [], fill, 1)
+        new_cnvs.draw_circle(this.x, this.y, this.r, fill, this.stroke)
+
+        new_cnvs.draw_circle(sc.x, sc.y, sc.r, sc.fill, sc.stroke)
+    }
+    calculate_bounding_rect = () => {
+        this.bottom = Math.floor(this.y + this.r)
+        this.top = Math.floor(this.y - this.r)
+        this.left = Math.floor(this.x - this.r)
+        this.right = Math.floor(this.x + this.r)
+    }
+    move = (cx, cy) => {
+        this.x += cx
+        this.y += cy
+        this.calculate_bounding_rect()
+        this.inlet_pos()
+    }
+    collide = (cx, cy) => {
+        let dx = cx - this.x
+        let dy = cy - this.y
+        let dist = dx * dx + dy * dy//2 *2 + 4*4
+
+        return (dist < (this.r * this.r)) ? true : false
+    }
+}
+//another name for group
+class CUSTOM extends NODE {
+    constructor(name, fill, stroke, node_lst) {
+        super(0, 0, 'CUSTOM', fill, stroke)
+        this.custom_name = name
+        this.w = 0
+        this.h = 0
+        this.inpin = []
+        this.outpin = []
+
+    }
+    init = (node_lst) => {
+        let r = 6
+        //touch this
+        let inpins = node_list.filter(node => node.name == 'INPUT')
+        let outpins = node_list.filter(node => node.name == 'OUTPUT')
+
+        let pin_count = Math.max(inpins.length, outpins.length)
+        this.w = 80
+        this.h = (pin_count * (r * 3)) + (gap * (pin_count + 1))
+        // this.calculate_bounding_rect()
+        // this.calculate_pin_pos(inpin_len, outpin_len, r)
+        // this.draw()
+    }
+
+}
 class CANVAS {
+    offset = 0
     draw_circle = (x, y, r, fill, stroke, lwidth) => {
         cnt.lineWidth = lwidth
+        cnt.lineDashOffset = 0
+        cnt.setLineDash([])
         cnt.beginPath()
         cnt.strokeStyle = stroke
         cnt.arc(x, y, r, 0, 2 * Math.PI)
@@ -327,7 +482,7 @@ class CANVAS {
         cnt.stroke()
     }
     draw_rect = (x, y, fill, stroke, w, h, lwidth) => {
-
+        cnt.lineDashOffset = 0
         cnt.lineWidth = lwidth
         cnt.beginPath()
         cnt.strokeStyle = stroke
@@ -346,22 +501,236 @@ class CANVAS {
         cnt.fillText(name, x + ((w - text.width) / 2), y + ((h + textheight) / 2));
         cnt.stroke()
     }
-    draw_line = (x1, y1, x2, y2, pattern, stroke, lwidth) => {
+    draw_line = (x1, y1, x2, y2, pattern, stroke, lwidth, offset) => {
         cnt.beginPath()
 
         cnt.moveTo(x1, y1)
         cnt.lineTo(x2, y2)
+        // cnt.lineJoin = "round";
+        cnt.lineCap = "round";
         cnt.lineWidth = lwidth
         cnt.strokeStyle = stroke
+        cnt.lineDashOffset = -offset;
         cnt.setLineDash(pattern)
         cnt.stroke()
+    }
+    get_line_collision = () => {
+        let result = { start_pos: [], end_pos: [], node: '' }
+        for (let nn = 0; nn < wires.length; nn++) {
+            const wire = wires[nn];
+            let lines = []
+            lines.push([wire.out_node.x, wire.out_node.y])
+            lines.push(...wire.connector)
+            lines.push([wire.in_node.x, wire.in_node.y])
+            for (let ii = 1; ii < lines.length; ii++) {
+                let [x1, y1] = lines[ii - 1]
+                let [x2, y2] = lines[ii]
+                if (this.line_collide(x1, y1, x2, y2)) {
+                    result = { start_pos: [x1, y1], end_pos: [x2, y2], node: wire }
+                }
+            }
+        } return result
+    }
+    line_collide = (x1, y1, x2, y2) => {
+        cnt.beginPath()
+        cnt.lineWidth = 10
+        cnt.moveTo(x1, y1)
+        cnt.lineTo(x2, y2)
+        if (cnt.isPointInStroke(mouse_pos.x, mouse_pos.y)) {
+            return true
+        } else {
+            return false
+
+        }
+    }
+    draw_wires = () => {
+        this.offset = (this.offset + 1) % 100
+        wires.forEach(wire => {
+            let array = []
+            array.push([wire.out_node.x, wire.out_node.y])
+            array.push(...wire.connector)
+            array.push([wire.in_node.x, wire.in_node.y])
+            for (let c = 1; c < array.length; c++) {
+                let [x1, y1] = array[c - 1]
+                let [x2, y2] = array[c]
+
+                let [sx, sy] = line_selected.start_pos
+                let [ex, ey] = line_selected.end_pos
+                if (sx == x1 && sy == y1 && ex == x2 && ey == y2) {
+                    this.draw_line(x1, y1, x2, y2, [], 'white', 10)
+                }
+                let stroke = (wire.out_node.state == 0) ? 'black' : 'red'
+                let dash = (wire.out_node.state == 0) ? [] : [5, 10]
+                this.draw_line(x1, y1, x2, y2, dash, stroke, 5, this.offset)
+            }
+        })
     }
 }
 
 
+const reset_node_evaluation_state = () => {
+    node_list.forEach(node => {
+        if (node.name == 'AND' || node.name == 'NOT') node.is_evaluated = false
+    })
+}
+const node_clicked = (ev) => {
+    let node_clk = ''
+    node_list.forEach(node => {
+        if (node.name == 'INPUT') {
+            if (node.outlet.collide(ev.offsetX, ev.offsetY)) node_clk = node.outlet
+        } else if (node.name == 'OUTPUT') {
+            if (node.inlet.collide(ev.offsetX, ev.offsetY)) node_clk = node.inlet
+        } else {
+            node.inpin.forEach(pin => {
+                if (pin.collide(ev.offsetX, ev.offsetY)) node_clk = pin
+            })
+            node.outpin.forEach(pin => {
+                if (pin.collide(ev.offsetX, ev.offsetY)) node_clk = pin
+            })
+        }
+    })
+    return node_clk;
+}
+
+const connect_rules = (node_a, node_b, container) => {
+    let can_connect = false
+    if (node_a.name == 'OUTLET' && node_b.name == 'IN' && container.in_node == '') {
+        can_connect = true
+        console.log(0);
+    } else if (node_a.name == 'OUT' && node_b.name == 'IN' && container.in_node == '') {
+        can_connect = true
+        console.log(1);
+    } else if (node_a.name == 'OUT' && node_b.name == 'INLET' && container.in_node == '') {
+        can_connect = true
+        console.log(2);
+    } else if ((node_a.name == 'OUTLET' || node_a.name == 'OUT') && container.out_node == '') {
+        can_connect = true
+        console.log(3);
+    } else if ((node_b.name == 'INLET' || node_b.name == 'IN') && container.in_node == '') {
+        can_connect = true
+        console.log(4);
+    } console.log("can_connect :", can_connect, node_a.name, node_b.name);
+    return can_connect
+}
+
+const create_connection = (ev) => {
+    let node = node_clicked(ev)
+    console.log(node.name, node.x, node.y);
+    if (node) {
+        if (connect_rules(node, temp_connect.in_node, temp_connect)) {
+            temp_connect.out_node = node
+        } else if (connect_rules(temp_connect.out_node, node, temp_connect)) {
+            temp_connect.in_node = node
+        }
+    }
+    console.log(temp_connect);
+    //make sure it not under any logic
+    if (node == '' && line_selected.start_pos == '' && !node_list.some((node) => node.collide(ev.offsetX, ev.offsetY))) {
+        if (temp_connect.out_node) {
+            temp_connect.connector.push([ev.offsetX, ev.offsetY])
+        } else if (temp_connect.in_node) {
+            temp_connect.connector = temp_connect.connector.reverse()
+            temp_connect.connector.push([ev.offsetX, ev.offsetY])
+            temp_connect.connector = temp_connect.connector.reverse()
+        }
+    }
+
+    if (node == '' && line_selected.start_pos != '') {
+        if (temp_connect.out_node) {//make sure it connect to mutiple wire whn it has mutilpe
+            temp_connect.connector.push([ev.offsetX, ev.offsetY])
+
+            update_connector(line_selected.node.connector, line_selected.end_pos, frm = true)
+            temp_connect.in_node = line_selected.node.in_node
+        } else if (temp_connect.in_node) {
+
+            temp_connect.out_node = line_selected.node.out_node
+            let temp = temp_connect.connector
+            temp_connect.connector = []
+            update_connector(line_selected.node.connector, line_selected.start_pos,)
+            temp_connect.connector.push([ev.offsetX, ev.offsetY])
+            temp_connect.connector.push(...temp)
+
+        } else if (temp_connect.out_node == '' && temp_connect.in_node == '') {
+            temp_connect.out_node = line_selected.node.out_node
+            update_connector(line_selected.node.connector, line_selected.start_pos,)
+            temp_connect.connector.push([ev.offsetX, ev.offsetY])
+        }
+    }
+    if (temp_connect.out_node && temp_connect.in_node) {
+        connect_node()
+        wires.push(clone_temp_connect(temp_connect))
+        console.log(temp_connect);
+        temp_connect = { out_node: '', connector: [], in_node: '' }
+        evaluate_node_list()
+        reset_node_evaluation_state()
+        evaluate_node_list()
+        reset_node_evaluation_state()
+        // console.log(node_list);
+    }
+}
+const evaluate_node_list = (array = []) => {
+    let start_node = []
+    let pins = []
+    if (array != '') {
+        start_node = array
+        start_node.forEach(node => pins.push(...node.outpin))
+    } else {
+        start_node = node_list.filter(node => node.name == 'INPUT')
+        start_node.forEach(node => pins.push(node.outlet))
+    }
+    let next_node = []
+    pins.forEach(pin => {
+        if (pin.parent.name == 'AND' || pin.parent.name == 'NOT') pin.parent.evaluate()
+        pin.connected_nodes.forEach(node => {
+            node.state = pin.state
+            console.log(`${pin.name}:`, node.state, array.length);
+            if (next_node.every(logic => logic != node.parent)
+                && !node.parent.is_evaluated && node.parent.name != 'OUTPUT') {
+                next_node.push(node.parent)
+            }
+            node.parent.is_evaluated = true
+        })
+    })
+    // node_list.forEach(node =>{
+    //     if(node.name == 'AND' || node.name == 'NOT') node.evaluate()
+    // })
+    if (next_node != '') {
+        evaluate_node_list(next_node)
+    }
+
+}
+const update_connector = (connector, elm, frm = false) => {
+    let index = connector.findIndex(e => e[0] == elm[0] && e[1] == elm[1])
+
+    let x = 0
+    let end = 0
+    if (frm) {
+        x = index
+        end = connector.length
+    } else {
+        end = index + 1
+    }
+    // console.log(index, frm, x, end);
+    if (index >= 0) {
+        for (x; x < end; x++) {
+            temp_connect.connector.push(connector[x])
+        }
+    }
+}
+const connect_node = () => {
+    temp_connect.out_node.connected_nodes.push(temp_connect.in_node)
+}
+const clone_temp_connect = (obj) => {
+    let temp = { out_node: '', connector: [], in_node: '' }
+    temp.out_node = obj.out_node
+    temp.connector = obj.connector
+    temp.in_node = obj.in_node
+    return temp
+}
 const render = () => {
     cnt.clearRect(0, 0, cnt.canvas.width, cnt.canvas.height)
 
+    if (temp_canvas_class != null) temp_canvas_class.draw_wires()
     node_list.forEach(node => {
         node.draw()
     })
