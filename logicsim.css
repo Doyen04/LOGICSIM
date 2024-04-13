@@ -38,12 +38,32 @@ header{
     background-color: rgb(27, 27, 44);
     display: flex;
     align-items: center;
-    padding-left: 40px;
+    padding-left: 20px;
     color: white;
     font-family: sans-serif;
     font-weight: bold;
 }
-
+.menu{
+    background-color: lightblue;
+    margin-right: 15px;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.menu-list{
+    display: none;
+    position: absolute;
+    background-color: grey;
+    padding: 5px;
+    cursor: pointer;
+}
+.menu-list > div{
+    padding: 5px;
+}
+.menu-list > div:hover{
+    background-color: aliceblue;
+    border-radius: 5px;
+}
 aside{
     width: 40px;
     font-size: small;

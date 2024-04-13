@@ -2,6 +2,8 @@ let body = document.getElementsByTagName('body')[0]
 let cnvs = document.getElementById('canvas')
 let cnt = cnvs.getContext('2d')
 let section = document.getElementsByTagName('section')[0]
+let menu = document.getElementsByClassName('menu')[0]
+let menu_list = document.getElementsByClassName('menu-list')[0]
 
 let button_click = false
 let is_mouse_down = false
@@ -24,7 +26,8 @@ cnvs.addEventListener('mousedown', handle_mouse_down)
 cnvs.addEventListener('mouseup', handle_mouse_up)
 cnvs.addEventListener('contextmenu', handle_right_click)
 window.addEventListener('resize', handle_window_resize)
-window.addEventListener('keypress',handle_key_press)
+menu.addEventListener('click', handle_menu_press)
+menu_list.addEventListener('click', handle_menu_list_press)
 
 let temp_canvas_class = null
 function handle_mouse_move(ev) {
@@ -148,12 +151,17 @@ function handle_window_resize(ev) {
 }
 handle_window_resize()
 
-function handle_key_press(ev){
-    ev.preventDefault()
-    if (ev.ctrlKey && ev.key == 's') {
-        alert(4444)
+function handle_menu_press(ev) {
+    menu_list.style.display = (menu_list.style.display == 'block') ? 'none' : 'block';
+    menu_list.style.left = `${40}px`
+    menu_list.style.top = `${40}px`
+
+}
+function handle_menu_list_press(ev) {
+    if (ev.target.innerText == 'Save As') {
+        save_node_list()
     }
-    console.log(ev);
+
 }
 
 let logics = document.getElementsByClassName('box')
@@ -201,6 +209,7 @@ const drag_logic = (cx, cy) => {
 }
 class NODE {
     constructor(x, y, name, fill, stroke) {
+        this.id = ''
         this.name = name
         this.custom_name = ''
         this.x = x
@@ -211,6 +220,15 @@ class NODE {
         this.right = 0
         this.stroke = stroke
         this.fill = fill
+        this.randId();
+    }
+    randId () {
+        let result = ''
+        let array = [1, 2, 3, 4, 5, 6,7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+        for (let xx = 0; xx < 6; xx++) {
+            result += array[Math.floor(Math.random() * array.length)]
+        } 
+        this.id = result
     }
     collide = (cx, cy) => {
         if (cx > this.x && cy > this.y &&
@@ -282,6 +300,29 @@ class NODE {
         })
 
     }
+    toJSON () {
+        return {
+            id: this.id,
+            name: this.name,
+            custom_name: this.custom_name,
+            x: this.x,
+            y: this.y,
+            top: this.top,
+            bottom: this.bottom,
+            left: this.left,
+            right: this.right,
+            stroke: this.stroke,
+            fill: this.fill,
+            w: this.w,
+            h: this.h,
+            inpin: this.inpin,
+            outpin: this.outpin,
+            outlet: this.outlet,
+            inlet: this.inlet,
+            is_evaluated: false,
+        }
+    }
+    
 }
 class PIN extends NODE {
     constructor(parent, x, y, r, name, fill = 'blue', stroke = 'grey') {
@@ -291,6 +332,23 @@ class PIN extends NODE {
         this.state = 0
         this.r = r
         this.outpin = []
+    }
+    toJSON = ()=>{
+        return{
+            ...super.toJSON(),
+            parent : this.parent.id,
+            state : this.state,
+            connected_nodes : this.ret(),
+            
+        }
+    }
+    ret (){
+        let idArray = []
+        for (let xx = 0; xx < this.connected_nodes.length; xx++) {
+
+            idArray.push(this.connected_nodes[xx].id)
+        }
+        return idArray
     }
     collide = (cx, cy) => {
         let dx = cx - this.x
@@ -302,6 +360,7 @@ class PIN extends NODE {
 }
 
 class AND extends NODE {
+
     constructor(x, y, fill = 'brown', stroke = 'grey') {
         super(x, y, 'AND', fill, stroke)
         this.w = 0
@@ -346,9 +405,9 @@ class INPUT extends NODE {
         this.fill = (this.state == 0) ? 'blue' : 'red';
         this.outlet.state = this.state
         evaluate_node_list()
-        reset_node_evaluation_state()
+
         evaluate_node_list()
-        reset_node_evaluation_state()
+
     }
     init = () => {
         this.outlet = new PIN(this, 0, 0, 6, 'OUTLET', this.fill, this.stroke)
@@ -567,6 +626,19 @@ class CANVAS {
     }
 }
 
+const save_node_list = () => {
+    if (node_list == '') return
+    if (!node_list.some(node => node.name == 'INPUT')) return
+    if (!node_list.some(node => node.name == 'OUTPUT')) return
+
+    let name = prompt('Enter Descriptive Name For Chip maxlength(10):')
+    if (name != '' && name.length <= 10) {
+
+        localStorage.setItem(name, JSON.stringify(node_list))
+    } else {
+        save_node_list()
+    }
+}
 
 const reset_node_evaluation_state = () => {
     node_list.forEach(node => {
@@ -662,9 +734,7 @@ const create_connection = (ev) => {
         console.log(temp_connect);
         temp_connect = { out_node: '', connector: [], in_node: '' }
         evaluate_node_list()
-        reset_node_evaluation_state()
         evaluate_node_list()
-        reset_node_evaluation_state()
         // console.log(node_list);
     }
 }
@@ -697,7 +767,7 @@ const evaluate_node_list = (array = []) => {
     if (next_node != '') {
         evaluate_node_list(next_node)
     }
-
+    reset_node_evaluation_state()
 }
 const update_connector = (connector, elm, frm = false) => {
     let index = connector.findIndex(e => e[0] == elm[0] && e[1] == elm[1])
