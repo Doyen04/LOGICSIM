@@ -13,7 +13,7 @@
 </body>
 <script>
     //[x:50 y:50][250 50][250 300] 50 30
-    const radius = 15;
+    const radius = 10;
 
     class CustomArray extends Array {
         add(array) {
@@ -47,19 +47,15 @@
 
     function calculateAngle(p0, p1, p2) {
         // Create vectors using your existing classes
-        const v1 = new CustomArray(...p1).minus(new CustomArray(...p0)); // Vector from p0 to p1
+        const v1 = new CustomArray(...p0).minus(new CustomArray(...p1)); // Vector from p0 to p1
         const v2 = new CustomArray(...p2).minus(new CustomArray(...p1)); // Vector from p1 to p2
-        console.log(v1, v2, 0);
-        
+
         // Calculate dot product
         const dotProduct = v1[0] * v2[0] + v1[1] * v2[1];
-        console.log(dotProduct, 1);
         
         // Calculate magnitudes
         const magnitude1 = v1.vecLength();
         const magnitude2 = v2.vecLength();
-        console.log(magnitude1,magnitude2, 2);
-        
 
         // Calculate angle in radians
         const angleRadians = Math.acos(dotProduct / (magnitude1 * magnitude2));
@@ -74,7 +70,7 @@
         [50, 50],
         [250, 50],
         [250, 150],
-        [50, 50]
+        [350, 50]
     ];
 
     const canvas = document.querySelector('canvas');
@@ -97,21 +93,22 @@
         const v2 = new Vector2(p1, p2);
 
         const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
-        
         const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
 
         const p1Start = new CustomArray(...p0).add(dir1); // Point to stop before corner
         const p1End = new CustomArray(...p2).minus(dir2); // Point to resume after corner
 
+        const angle = calculateAngle(p0, p1, p2)
+        const adjustedRadius = (angle >= 90) ? radius : (angle * radius)/90; // Adjust radius based on angle
+
         ctx.lineTo(...p1Start);
-        ctx.arcTo(...p1, ...p1End, radius);
+        ctx.arcTo(...p1, ...p1End, adjustedRadius);
     }
 
     // Final point
     ctx.lineTo(...points[points.length - 1]);
-
     ctx.stroke();
-
+   
     // ctx.fillStyle = 'blue'
     // ctx.beginPath()
     // ctx.arc(reducedCoord[0], reducedCoord[1], 5, 0, Math.PI * 2)
