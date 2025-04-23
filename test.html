@@ -13,94 +13,75 @@
 </body>
 <script>
     //[x:50 y:50][250 50][250 300] 50 30
-    let radius = 15
+    const radius = 15;
+
     class CustomArray extends Array {
-        add = (array) => {
-            let x = this[0] + array[0]
-            let y = this[1] + array[1]
-            return new CustomArray(x, y)
+        add(array) {
+            return new CustomArray(this[0] + array[0], this[1] + array[1]);
         }
-        minus = (array) => {
-            let x = this[0] - array[0]
-            let y = this[1] - array[1]
-            return new CustomArray(x, y)
+        minus(array) {
+            return new CustomArray(this[0] - array[0], this[1] - array[1]);
         }
-        divideBy = (num) => {
-            return new CustomArray(this[0] / num, this[1] / num)
+        divideBy(num) {
+            return new CustomArray(this[0] / num, this[1] / num);
         }
-        multiplyBy = (num) =>{
-            return new CustomArray(this[0] * num, this[1] * num)
+        multiplyBy(num) {
+            return new CustomArray(this[0] * num, this[1] * num);
         }
-
     }
+
     class Vector2 extends Array {
-        vecLength = () => {
-            let p1 = new CustomArray(...this[0])
-            let p2 = new CustomArray(...this[1])
-
-            let coord = p2.minus(p1)
-            return Math.sqrt((coord[0] ** 2 + coord[1] ** 2))
+        vecLength() {
+            const [p1, p2] = this.map(p => new CustomArray(...p));
+            return Math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2);
         }
-        normalise = () => {
-            let p1 = new CustomArray(...this[0])
-            let p2 = new CustomArray(...this[1])
-
-            let len = this.vecLength()
-            let coord = p2.minus(p1)
-            
-            return coord.divideBy(len)
+        normalise() {
+            const [p1, p2] = this.map(p => new CustomArray(...p));
+            const direction = p2.minus(p1);
+            return direction.divideBy(this.vecLength());
         }
-        shrink =()=>{
-
-        }
-
     }
-    //90deg = 15
-    //45deg = ?
-    //even uses [0,2,4] add and first vector
-    const coord = new Vector2([50, 50], [250, 50])
-    const cRLen = coord.vecLength() - radius
-    const scaledCoord = coord.normalise().multiplyBy(cRLen)
-    const reducedCoord = new CustomArray(...coord[0]).add(scaledCoord)
 
-    //odd use [1,3,5] minus second
-    const coord2 = new Vector2([250, 50], [250, 150])
-    const c2RLen = coord2.vecLength() - radius
-    const scaledCoord2 = coord2.normalise().multiplyBy(c2RLen)
-    const reducedCoord2 = new CustomArray(...coord2[1]).minus(scaledCoord2)
+    const points = [
+        [50, 50],
+        [250, 50],
+        [250, 150],
+        [50, 50]
+    ];
 
-    //even uses [0,2,4] add and first vector
-    const coord3 = new Vector2([250, 50], [250, 150])
-    const c3RLen = coord3.vecLength() - radius
-    const scaledCoord3 = coord3.normalise().multiplyBy(c3RLen)
-    const reducedCoord3 = new CustomArray(...coord3[0]).add(scaledCoord3)
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 5;
+    ctx.lineJoin = 'round';
 
-    //odd use [1,3,5] minus second
-    const coord4 = new Vector2([250, 150], [50, 50])
-    const c4RLen = coord4.vecLength() - radius
-    const scaledCoord4 = coord4.normalise().multiplyBy(c4RLen)
-    const reducedCoord4 = new CustomArray(...coord4[1]).minus(scaledCoord4)
+    ctx.beginPath();
 
+    // Start at first point
+    ctx.moveTo(...points[0]);
 
-    const canvas = document.querySelector('canvas')
-    const ctx = canvas.getContext('2d')
-    ctx.strokeStyle = 'black'
-    ctx.lineWidth = 5
-    ctx.lineJoin = 'round'
-    ctx.beginPath()
-    // ctx.moveTo(...coord[0])
-    // ctx.lineTo(...coord[1])
-    // ctx.lineTo(...coord2[1])
-    // ctx.lineTo(...coord4[1])
-    ctx.moveTo(...coord[0])
-    ctx.lineTo(reducedCoord[0], reducedCoord[1])//[250:-50 50] 
-    ctx.arcTo(...coord[1], reducedCoord2[0], reducedCoord2[1], 15)//[250, 50][250, 50:+50]
-    // ctx.lineTo(...coord2[1])
-    ctx.lineTo(reducedCoord3[0], reducedCoord3[1])
-    ctx.arcTo(...coord3[1], reducedCoord4[0], reducedCoord4[1], 7.5)
-    ctx.lineTo(...coord4[1])
+    for (let i = 0; i < points.length - 2; i++) {
+        const p0 = points[i];
+        const p1 = points[i + 1];
+        const p2 = points[i + 2];
 
-    ctx.stroke()
+        const v1 = new Vector2(p0, p1);
+        const v2 = new Vector2(p1, p2);
+
+        const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
+        const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
+
+        const p1Start = new CustomArray(...p0).add(dir1); // Point to stop before corner
+        const p1End = new CustomArray(...p2).minus(dir2); // Point to resume after corner
+
+        ctx.lineTo(...p1Start);
+        ctx.arcTo(...p1, ...p1End, radius);
+    }
+
+    // Final point
+    ctx.lineTo(...points[points.length - 1]);
+
+    ctx.stroke();
     
     // ctx.fillStyle = 'blue'
     // ctx.beginPath()
