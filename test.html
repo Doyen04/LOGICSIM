@@ -1,0 +1,123 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas width="400" height="400">
+
+    </canvas>
+</body>
+<script>
+    //[x:50 y:50][250 50][250 300] 50 30
+    let radius = 15
+    class CustomArray extends Array {
+        add = (array) => {
+            let x = this[0] + array[0]
+            let y = this[1] + array[1]
+            return new CustomArray(x, y)
+        }
+        minus = (array) => {
+            let x = this[0] - array[0]
+            let y = this[1] - array[1]
+            return new CustomArray(x, y)
+        }
+        divideBy = (num) => {
+            return new CustomArray(this[0] / num, this[1] / num)
+        }
+        multiplyBy = (num) =>{
+            return new CustomArray(this[0] * num, this[1] * num)
+        }
+
+    }
+    class Vector2 extends Array {
+        vecLength = () => {
+            let p1 = new CustomArray(...this[0])
+            let p2 = new CustomArray(...this[1])
+
+            let coord = p2.minus(p1)
+            return Math.sqrt((coord[0] ** 2 + coord[1] ** 2))
+        }
+        normalise = () => {
+            let p1 = new CustomArray(...this[0])
+            let p2 = new CustomArray(...this[1])
+
+            let len = this.vecLength()
+            let coord = p2.minus(p1)
+            
+            return coord.divideBy(len)
+        }
+        shrink =()=>{
+
+        }
+
+    }
+    //90deg = 15
+    //45deg = ?
+    //even uses [0,2,4] add and first vector
+    const coord = new Vector2([50, 50], [250, 50])
+    const cRLen = coord.vecLength() - radius
+    const scaledCoord = coord.normalise().multiplyBy(cRLen)
+    const reducedCoord = new CustomArray(...coord[0]).add(scaledCoord)
+
+    //odd use [1,3,5] minus second
+    const coord2 = new Vector2([250, 50], [250, 150])
+    const c2RLen = coord2.vecLength() - radius
+    const scaledCoord2 = coord2.normalise().multiplyBy(c2RLen)
+    const reducedCoord2 = new CustomArray(...coord2[1]).minus(scaledCoord2)
+
+    //even uses [0,2,4] add and first vector
+    const coord3 = new Vector2([250, 50], [250, 150])
+    const c3RLen = coord3.vecLength() - radius
+    const scaledCoord3 = coord3.normalise().multiplyBy(c3RLen)
+    const reducedCoord3 = new CustomArray(...coord3[0]).add(scaledCoord3)
+
+    //odd use [1,3,5] minus second
+    const coord4 = new Vector2([250, 150], [50, 50])
+    const c4RLen = coord4.vecLength() - radius
+    const scaledCoord4 = coord4.normalise().multiplyBy(c4RLen)
+    const reducedCoord4 = new CustomArray(...coord4[1]).minus(scaledCoord4)
+
+
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 5
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    // ctx.moveTo(...coord[0])
+    // ctx.lineTo(...coord[1])
+    // ctx.lineTo(...coord2[1])
+    // ctx.lineTo(...coord4[1])
+    ctx.moveTo(...coord[0])
+    ctx.lineTo(reducedCoord[0], reducedCoord[1])//[250:-50 50] 
+    ctx.arcTo(...coord[1], reducedCoord2[0], reducedCoord2[1], 15)//[250, 50][250, 50:+50]
+    // ctx.lineTo(...coord2[1])
+    ctx.lineTo(reducedCoord3[0], reducedCoord3[1])
+    ctx.arcTo(...coord3[1], reducedCoord4[0], reducedCoord4[1], 7.5)
+    ctx.lineTo(...coord4[1])
+
+    ctx.stroke()
+    
+    // ctx.fillStyle = 'blue'
+    // ctx.beginPath()
+    // ctx.arc(reducedCoord[0], reducedCoord[1], 5, 0, Math.PI * 2)
+    // ctx.fill()
+    // ctx.beginPath()
+    // ctx.arc(...coord[1], 5, 0, Math.PI * 2)
+    // ctx.fill()
+    // ctx.beginPath()
+    // ctx.arc(reducedCoord2[0], reducedCoord2[1], 5, 0, Math.PI * 2)
+    // ctx.fill()
+    // ctx.beginPath()
+    // ctx.arc(reducedCoord3[0], reducedCoord3[1], 5, 0, Math.PI * 2)
+    // ctx.fill()
+    // ctx.beginPath()
+    // ctx.arc(reducedCoord4[0], reducedCoord4[1], 5, 0, Math.PI * 2)
+    // ctx.fill()
+</script>
+
+</html>

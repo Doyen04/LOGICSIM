@@ -29,6 +29,8 @@ window.addEventListener('resize', handle_window_resize)
 menu.addEventListener('click', handle_menu_press)
 menu_list.addEventListener('click', handle_menu_list_press)
 
+window.addEventListener('click', ()=>{(menu_list.style.display == 'none')?menu_list.style.display = 'none':''})
+
 let temp_canvas_class = null
 function handle_mouse_move(ev) {
     let newx = ev.offsetX - mouse_pos.x
@@ -155,11 +157,13 @@ function handle_menu_press(ev) {
     menu_list.style.display = (menu_list.style.display == 'block') ? 'none' : 'block';
     menu_list.style.left = `${40}px`
     menu_list.style.top = `${40}px`
-
+    ev.stopPropagation()
 }
 function handle_menu_list_press(ev) {
     if (ev.target.innerText == 'Save As') {
         save_node_list()
+    }else if(ev.target.innerText == 'Library'){
+        display_library()
     }
 
 }
@@ -188,8 +192,11 @@ function insert_node(ev) {
     if (ev.target.innerText == 'NOT') node_selected.push(new NOT(x, y))
     if (ev.target.innerText == 'INPUT') node_selected.push(new INPUT(x, y))
     if (ev.target.innerText == 'OUTPUT') node_selected.push(new OUTPUT(x, y))
+    if (ev.target.innerText == 'CUSTOM') node_selected.push(new CUSTOM(x, y))
+    
     // arrangelogic(selectedlogic, x
 }
+
 const get_new_y = (y) => {
     let last_node = y
     node_selected.forEach((node, x) => {
@@ -635,16 +642,31 @@ const save_node_list = () => {
     if (name != '' && name.length <= 10) {
 
         localStorage.setItem(name, JSON.stringify(node_list))
+
     } else {
         save_node_list()
     }
 }
 
+const display_library = () =>{
+    let modal = document.getElementsByClassName('modal-container')[0]
+    modal.classList.toggle("toggle-modal")
+    let container = document.getElementsByClassName('chips-container')[0]
+    for (let cc = 0; cc < localStorage.length; cc++) {
+        const key = localStorage.key(cc);
+        let elm = document.createElement('article')
+        elm.classList.add('chips')
+        elm.innerHTML = key
+        container.appendChild(elm)
+    }
+
+}
 const reset_node_evaluation_state = () => {
     node_list.forEach(node => {
         if (node.name == 'AND' || node.name == 'NOT') node.is_evaluated = false
     })
 }
+
 const node_clicked = (ev) => {
     let node_clk = ''
     node_list.forEach(node => {
@@ -738,6 +760,7 @@ const create_connection = (ev) => {
         // console.log(node_list);
     }
 }
+
 const evaluate_node_list = (array = []) => {
     let start_node = []
     let pins = []
@@ -769,6 +792,7 @@ const evaluate_node_list = (array = []) => {
     }
     reset_node_evaluation_state()
 }
+
 const update_connector = (connector, elm, frm = false) => {
     let index = connector.findIndex(e => e[0] == elm[0] && e[1] == elm[1])
 
@@ -787,9 +811,11 @@ const update_connector = (connector, elm, frm = false) => {
         }
     }
 }
+
 const connect_node = () => {
     temp_connect.out_node.connected_nodes.push(temp_connect.in_node)
 }
+
 const clone_temp_connect = (obj) => {
     let temp = { out_node: '', connector: [], in_node: '' }
     temp.out_node = obj.out_node
@@ -797,6 +823,7 @@ const clone_temp_connect = (obj) => {
     temp.in_node = obj.in_node
     return temp
 }
+
 const render = () => {
     cnt.clearRect(0, 0, cnt.canvas.width, cnt.canvas.height)
 

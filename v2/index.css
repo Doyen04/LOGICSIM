@@ -1,0 +1,119 @@
+:root{
+    --header-h: 40px;
+    --side-bar: 40px;
+}
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+body{
+    max-width: 100vw;
+    height: 100vh;
+    background-color: rgb(71, 71, 71);
+    --c: #58c;
+    --b: rgba(255, 255, 255, 0.267);
+    --t: rgba(255, 255, 255, 0.144);
+    --n: transparent;
+}
+
+body{
+    position: relative;
+    background-image:
+            linear-gradient(0deg,
+            var(--n) 0%, var(--n) 9px,
+            var(--b) 9px, var(--b) 10px, var(--n) 10px, var(--n) 19px,
+            var(--t) 19px, var(--t) 20px, var(--n) 20px, var(--n) 29px,
+            var(--t) 29px, var(--t) 30px, var(--n) 30px, var(--n) 39px,
+            var(--t) 39px, var(--t) 40px, var(--n) 40px, var(--n) 49px,
+            var(--t) 49px, var(--t) 50px),
+            linear-gradient(-90deg,
+            var(--n) 0%, var(--n) 9px,
+            var(--b) 9px, var(--b) 10px, var(--n) 10px, var(--n) 19px,
+            var(--t) 19px, var(--t) 20px, var(--n) 20px, var(--n) 29px,
+            var(--t) 29px, var(--t) 30px, var(--n) 30px, var(--n) 39px,
+            var(--t) 39px, var(--t) 40px, var(--n) 40px, var(--n) 49px,
+            var(--t) 49px, var(--t) 50px);
+    background-size: 50px 50px;
+}
+header{
+    width: 100%;
+    height: var(--header-h);
+    background-color: rgb(27, 27, 44);
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    color: white;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+.menu-items{
+    width: 100%;
+    display: none;
+    align-items: center;
+    justify-content:flex-end ;
+    gap: 10px;
+    background-color: rgba(27, 27, 44, 0.784);
+    font-family: sans-serif;
+    padding: 5px;
+    position: absolute;
+    z-index: 5px;
+}
+.menu-items>div{
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    color: white;
+}
+.menu-items> div:hover{
+    background-color:rgba(69, 69, 149, 0.784) ;
+}
+.menu{
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+.menu:hover{
+    background-color:rgba(69, 69, 149, 0.784) ;
+}
+.canvas-sidebar-container{
+    width: 100%;
+    height: calc(100% - var(--header-h));
+    display: flex;
+
+}
+.sidebar{
+    width: var(--side-bar);
+    height: 100%;
+    background-color: rgb(27, 27, 44);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding-top: 3px;
+}
+.box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    background-color: var(--b);
+    border-radius: 5px;
+    font-family: sans-serif;
+    font-weight: bold;
+    color:white;
+    cursor: pointer;
+}
+.box:hover{
+    background-color: rgba(69, 69, 149, 0.784);
+}
+#canvas{
+    width: calc(100% - var(--side-bar));
+    height: 100%;
+}
