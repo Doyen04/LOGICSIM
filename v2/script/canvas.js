@@ -1,7 +1,7 @@
-import { CustomArray } from "./util.js" 
+import { CustomArray } from "./util.js"
 
-let cnvs = document.querySelector('#canvas')
-let cnt = cnvs.getContext('2d')
+let canvasElement = document.querySelector('#canvas')
+let canvasContext = canvasElement.getContext('2d')
 
 
 
@@ -10,51 +10,51 @@ const chipset = new CustomArray()
 
 class CANVAS {
     offset = 0
-    draw_circle = (x, y, r, fill, stroke, lwidth) => {
-        cnt.lineWidth = lwidth
-        cnt.lineDashOffset = 0
-        cnt.setLineDash([])
-        cnt.beginPath()
-        cnt.strokeStyle = stroke
-        cnt.arc(x, y, r, 0, 2 * Math.PI)
-        cnt.fillStyle = fill
-        cnt.fill()
-        cnt.stroke()
+    drawCircle = (x, y, r, fill, stroke, lwidth) => {
+        canvasContext.lineWidth = lwidth
+        canvasContext.lineDashOffset = 0
+        canvasContext.setLineDash([])
+        canvasContext.beginPath()
+        canvasContext.strokeStyle = stroke
+        canvasContext.arc(x, y, r, 0, 2 * Math.PI)
+        canvasContext.fillStyle = fill
+        canvasContext.fill()
+        canvasContext.stroke()
     }
-    draw_rect = (x, y, fill, stroke, w, h, lwidth) => {
-        cnt.lineDashOffset = 0
-        cnt.lineWidth = lwidth
-        cnt.beginPath()
-        cnt.strokeStyle = stroke
-        cnt.rect(x, y, w, h)
-        cnt.setLineDash([])
-        cnt.fillStyle = fill
-        cnt.fillRect(x, y, w, h)
-        cnt.stroke()
+    drawRectangle = (x, y, fill, stroke, w, h, lwidth) => {
+        canvasContext.lineDashOffset = 0
+        canvasContext.lineWidth = lwidth
+        canvasContext.beginPath()
+        canvasContext.strokeStyle = stroke
+        canvasContext.rect(x, y, w, h)
+        canvasContext.setLineDash([])
+        canvasContext.fillStyle = fill
+        canvasContext.fillRect(x, y, w, h)
+        canvasContext.stroke()
     }
-    draw_text = (x, y, w, h, name) => {
-        cnt.beginPath()
-        cnt.fillStyle = 'white'
-        cnt.font = '12px cursive'
-        let text = cnt.measureText(name)
+    drawText = (x, y, w, h, name) => {
+        canvasContext.beginPath()
+        canvasContext.fillStyle = 'white'
+        canvasContext.font = '12px cursive'
+        let text = canvasContext.measureText(name)
         let textheight = text.actualBoundingBoxAscent
-        cnt.fillText(name, x + ((w - text.width) / 2), y + ((h + textheight) / 2));
-        cnt.stroke()
+        canvasContext.fillText(name, x + ((w - text.width) / 2), y + ((h + textheight) / 2));
+        canvasContext.stroke()
     }
-    draw_line = (x1, y1, x2, y2, pattern, stroke, lwidth, offset) => {
-        cnt.beginPath()
+    drawLine = (x1, y1, x2, y2, pattern, stroke, lwidth, offset) => {
+        canvasContext.beginPath()
 
-        cnt.moveTo(x1, y1)
-        cnt.lineTo(x2, y2)
+        canvasContext.moveTo(x1, y1)
+        canvasContext.lineTo(x2, y2)
         // cnt.lineJoin = "round";
-        cnt.lineCap = "round";
-        cnt.lineWidth = lwidth
-        cnt.strokeStyle = stroke
-        cnt.lineDashOffset = -offset;
-        cnt.setLineDash(pattern)
-        cnt.stroke()
+        canvasContext.lineCap = "round";
+        canvasContext.lineWidth = lwidth
+        canvasContext.strokeStyle = stroke
+        canvasContext.lineDashOffset = -offset;
+        canvasContext.setLineDash(pattern)
+        canvasContext.stroke()
     }
-    get_line_collision = () => {
+    detectLineCollision = () => {
         let result = { start_pos: [], end_pos: [], node: '' }
         for (let nn = 0; nn < wires.length; nn++) {
             const wire = wires[nn];
@@ -65,25 +65,25 @@ class CANVAS {
             for (let ii = 1; ii < lines.length; ii++) {
                 let [x1, y1] = lines[ii - 1]
                 let [x2, y2] = lines[ii]
-                if (this.line_collide(x1, y1, x2, y2)) {
+                if (this.isLineColliding(x1, y1, x2, y2)) {
                     result = { start_pos: [x1, y1], end_pos: [x2, y2], node: wire }
                 }
             }
         } return result
     }
-    line_collide = (x1, y1, x2, y2) => {
-        cnt.beginPath()
-        cnt.lineWidth = 10
-        cnt.moveTo(x1, y1)
-        cnt.lineTo(x2, y2)
-        if (cnt.isPointInStroke(mouse_pos.x, mouse_pos.y)) {
+    isLineColliding = (x1, y1, x2, y2) => {
+        canvasContext.beginPath()
+        canvasContext.lineWidth = 10
+        canvasContext.moveTo(x1, y1)
+        canvasContext.lineTo(x2, y2)
+        if (canvasContext.isPointInStroke(mouse_pos.x, mouse_pos.y)) {
             return true
         } else {
             return false
 
         }
     }
-    draw_wires = () => {
+    renderWires = () => {
         this.offset = (this.offset + 1) % 100
         wires.forEach(wire => {
             let array = []
@@ -97,39 +97,40 @@ class CANVAS {
                 let [sx, sy] = line_selected.start_pos
                 let [ex, ey] = line_selected.end_pos
                 if (sx == x1 && sy == y1 && ex == x2 && ey == y2) {
-                    this.draw_line(x1, y1, x2, y2, [], 'white', 10)
+                    this.drawLine(x1, y1, x2, y2, [], 'white', 10)
                 }
                 let stroke = (wire.out_node.state == 0) ? 'black' : 'red'
                 let dash = (wire.out_node.state == 0) ? [] : [5, 10]
-                this.draw_line(x1, y1, x2, y2, dash, stroke, 5, this.offset)
+                this.drawLine(x1, y1, x2, y2, dash, stroke, 5, this.offset)
             }
         })
     }
-    render = () => {
-        cnt.clearRect(0, 0, cnt.canvas.width, cnt.canvas.height)
     
+    renderCanvas = () => {
+        canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height)
+
         // if (temp_canvas_class != null) temp_canvas_class.draw_wires()
         gates.forEach(gate => {
-            gate.draw()
+            gate.renderNode()
         })
         chipset.forEach(gate => {
-            gate.draw()
+            gate.renderNode()
         })
-        requestAnimationFrame(this.render)
+        requestAnimationFrame(this.renderCanvas)
     }
 }
 
-const handleWindowResize = (ev)=>{
+const adjustCanvasSize = (ev) => {
     const section = document.querySelectorAll('.canvas-sidebar-container')[0]
     const root = document.documentElement
     const styles = getComputedStyle(root)
 
     const side_bar = parseInt(styles.getPropertyValue('--side-bar').trim())
-    cnvs.setAttribute('width', `${section.offsetWidth - side_bar}px`)
-    cnvs.setAttribute('height', `${section.offsetHeight}px`)
+    canvasElement.setAttribute('width', `${section.offsetWidth - side_bar}px`)
+    canvasElement.setAttribute('height', `${section.offsetHeight}px`)
 }
-handleWindowResize()
+adjustCanvasSize()
 
-window.addEventListener('resize', handleWindowResize)
+window.addEventListener('resize', adjustCanvasSize)
 
-export {CANVAS, gates}
+export { CANVAS, gates }

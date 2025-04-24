@@ -1,7 +1,7 @@
 import { CANVAS } from "./canvas.js"
 
 
-class NODE {
+class Node {
     constructor(x, y, name, fill, stroke) {
         this.id = ''
         this.name = name
@@ -14,9 +14,9 @@ class NODE {
         this.right = 0
         this.stroke = stroke
         this.fill = fill
-        this.randId();
+        this.generateRandomId();
     }
-    randId () {
+    generateRandomId () {
         let result = ''
         let array = [1, 2, 3, 4, 5, 6,7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
         for (let xx = 0; xx < 6; xx++) {
@@ -24,7 +24,7 @@ class NODE {
         } 
         this.id = result
     }
-    collide = (cx, cy) => {
+    isColliding = (cx, cy) => {
         if (cx > this.x && cy > this.y &&
             cx < (this.right) && cy < (this.bottom)) {
             return true
@@ -35,10 +35,10 @@ class NODE {
     move = (cx, cy) => {
         this.x += cx
         this.y += cy
-        this.calculate_bounding_rect()
-        this.calculate_pin_pos(this.inpin.length, this.outpin.length, 6)
+        this.calculateBoundingBox()
+        this.calculatePinPositions(this.inpin.length, this.outpin.length, 6)
     }
-    calculate_bounding_rect = () => {
+    calculateBoundingBox = () => {
         this.bottom = Math.floor(this.y + this.h)
         this.top = Math.floor(this.y)
         this.left = Math.floor(this.x)
@@ -47,22 +47,22 @@ class NODE {
     init = (inpin_len, outpin_len) => {
         let r = 6
         for (let x = 0; x < inpin_len; x++) {
-            this.inpin.push(new PIN(this, 0, 0, r, 'IN', this.fill, this.stroke,))
+            this.inpin.push(new ConnectionPin(this, 0, 0, r, 'IN', this.fill, this.stroke,))
         }
         for (let x = 0; x < outpin_len; x++) {
-            this.outpin.push(new PIN(this, 0, 0, r, 'OUT', this.fill, this.stroke,))
+            this.outpin.push(new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,))
         }
         //touch this
         this.w = 80
         this.h = 40
-        this.calculate_bounding_rect()
-        this.calculate_pin_pos(inpin_len, outpin_len, r)
-        this.draw()
+        this.calculateBoundingBox()
+        this.calculatePinPositions(inpin_len, outpin_len, r)
+        this.renderNode()
     }
     
-    calculate_pin_pos = (inpin_len, outpin_len, r) => {
-        let in_y = this.space_evenly(this.y, (this.y + this.h), inpin_len, r)
-        let out_y = this.space_evenly(this.y, (this.y + this.h), outpin_len, r)
+    calculatePinPositions = (inpin_len, outpin_len, r) => {
+        let in_y = this.distributeEvenly(this.y, (this.y + this.h), inpin_len, r)
+        let out_y = this.distributeEvenly(this.y, (this.y + this.h), outpin_len, r)
 
         this.inpin.forEach((pin, x) => {
             pin.x = this.x
@@ -73,7 +73,7 @@ class NODE {
             pin.y = out_y[x]
         });
     }
-    space_evenly = (y1, y2, len, r) => {
+    distributeEvenly = (y1, y2, len, r) => {
         let coord = []
         let spacing = (((y2 - y1) - ((r * 2) * len)) / (len + 1))
         for (let x = 0; x < len; x++) {
@@ -82,16 +82,16 @@ class NODE {
             coord.push(y)
         } return coord
     }
-    draw = () => {
+    renderNode = () => {
         let new_cnvs = new CANVAS
-        new_cnvs.draw_rect(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
-        new_cnvs.draw_text(this.x, this.y, this.w, this.h, this.name)
+        new_cnvs.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
+        new_cnvs.drawText(this.x, this.y, this.w, this.h, this.name)
         this.inpin.forEach(pin => {
-            new_cnvs.draw_circle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
+            new_cnvs.drawCircle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
         })
 
         this.outpin.forEach(pin => {
-            new_cnvs.draw_circle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
+            new_cnvs.drawCircle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
         })
 
     }
@@ -120,7 +120,7 @@ class NODE {
     
 }
 
-class PIN extends NODE {
+class ConnectionPin extends Node {
     constructor(parent, x, y, r, name, fill = 'blue', stroke = 'grey') {
         super(x, y, name, fill, stroke)
         this.parent = parent
@@ -155,7 +155,7 @@ class PIN extends NODE {
     }
 }
 
-class AND extends NODE {
+class AndGate extends Node {
 
     constructor(x, y, fill = 'brown', stroke = 'grey') {
         super(x, y, 'AND', fill, stroke)
@@ -172,7 +172,7 @@ class AND extends NODE {
     }
 }
 
-class NOT extends NODE {
+class NotGate extends Node {
     constructor(x, y, fill = 'green', stroke = 'indigo') {
         super(x, y, 'NOT', fill, stroke)
         this.w = 0
@@ -188,7 +188,7 @@ class NOT extends NODE {
     }
 }
 
-class INPUT extends NODE {
+class InputGate extends Node {
     constructor(x, y, name = 'INPUT', fill = 'blue', stroke = 'white') {
         super(x, y, name, fill, stroke)
         this.state = 0
@@ -210,10 +210,10 @@ class INPUT extends NODE {
     }
 
     init = () => {
-        this.outlet = new PIN(this, 0, 0, 6, 'OUTLET', this.fill, this.stroke)
+        this.outlet = new ConnectionPin(this, 0, 0, 6, 'OUTLET', this.fill, this.stroke)
         this.outlet_pos()
-        this.calculate_bounding_rect()
-        this.draw()
+        this.calculateBoundingBox()
+        this.renderNode()
     }
     outlet_pos = () => {
         let x = this.x + this.gap
@@ -222,15 +222,15 @@ class INPUT extends NODE {
         this.outlet.y = y
     }
 
-    draw = () => {
+    renderNode = () => {
         let new_cnvs = new CANVAS
         let sc = this.outlet
-        new_cnvs.draw_circle(this.x, this.y, this.r, this.fill, this.stroke, 1)
-        new_cnvs.draw_line((this.x + (this.gap / 2)), this.y, sc.x, this.y, [], this.fill, 1)
+        new_cnvs.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
+        new_cnvs.drawLine((this.x + (this.gap / 2)), this.y, sc.x, this.y, [], this.fill, 1)
 
-        new_cnvs.draw_circle(sc.x, sc.y, sc.r, sc.fill, sc.stroke, 1)
+        new_cnvs.drawCircle(sc.x, sc.y, sc.r, sc.fill, sc.stroke, 1)
     }
-    calculate_bounding_rect = () => {
+    calculateBoundingBox = () => {
         this.bottom = Math.floor(this.y + this.r)
         this.top = Math.floor(this.y - this.r)
         this.left = Math.floor(this.x - this.r)
@@ -239,7 +239,7 @@ class INPUT extends NODE {
     move = (cx, cy) => {
         this.x += cx
         this.y += cy
-        this.calculate_bounding_rect()
+        this.calculateBoundingBox()
         this.outlet_pos()
     }
     collide = (cx, cy) => {
@@ -251,7 +251,7 @@ class INPUT extends NODE {
     }
 }
 
-class OUTPUT extends NODE {
+class OutputGate extends Node {
     constructor(x, y, name = 'OUTPUT', fill = 'blue', stroke = 'white') {
         super(x, y, name, fill, stroke)
         this.state = 0
@@ -261,10 +261,10 @@ class OUTPUT extends NODE {
         this.init()
     }
     init = () => {
-        this.inlet = new PIN(this, 0, 0, 6, 'INLET', this.fill, this.stroke)
+        this.inlet = new ConnectionPin(this, 0, 0, 6, 'INLET', this.fill, this.stroke)
         this.inlet_pos()
-        this.calculate_bounding_rect()
-        this.draw()
+        this.calculateBoundingBox()
+        this.renderNode()
     }
     inlet_pos = () => {
         let x = this.x - this.gap
@@ -273,17 +273,17 @@ class OUTPUT extends NODE {
         this.inlet.y = y
 
     }
-    draw = () => {
+    renderNode = () => {
         let new_cnvs = new CANVAS
         let sc = this.inlet
         this.state = sc.state
         let fill = (this.state == 0) ? 'blue' : 'red';
-        new_cnvs.draw_line(this.x, this.y, sc.x, this.y, [], fill, 1)
-        new_cnvs.draw_circle(this.x, this.y, this.r, fill, this.stroke)
+        new_cnvs.drawLine(this.x, this.y, sc.x, this.y, [], fill, 1)
+        new_cnvs.drawCircle(this.x, this.y, this.r, fill, this.stroke)
 
-        new_cnvs.draw_circle(sc.x, sc.y, sc.r, sc.fill, sc.stroke)
+        new_cnvs.drawCircle(sc.x, sc.y, sc.r, sc.fill, sc.stroke)
     }
-    calculate_bounding_rect = () => {
+    calculateBoundingBox = () => {
         this.bottom = Math.floor(this.y + this.r)
         this.top = Math.floor(this.y - this.r)
         this.left = Math.floor(this.x - this.r)
@@ -292,7 +292,7 @@ class OUTPUT extends NODE {
     move = (cx, cy) => {
         this.x += cx
         this.y += cy
-        this.calculate_bounding_rect()
+        this.calculateBoundingBox()
         this.inlet_pos()
     }
     collide = (cx, cy) => {
@@ -303,6 +303,7 @@ class OUTPUT extends NODE {
         return (dist < (this.r * this.r)) ? true : false
     }
 }
+
 //another name for group
 // class CUSTOM extends NODE {
 //     constructor(name, fill, stroke, node_lst) {
@@ -330,4 +331,4 @@ class OUTPUT extends NODE {
 
 // }
 
-export {AND, NOT, INPUT as IN, OUTPUT as OUT, };
+export {AndGate, NotGate, InputGate, OutputGate, };

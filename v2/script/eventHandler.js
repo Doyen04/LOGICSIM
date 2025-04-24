@@ -1,58 +1,60 @@
-import { AND, NOT, IN, OUT } from './gate.js'
-import { checkGates, getGateCoord } from './util.js'
+import { AndGate, NotGate, InputGate, OutputGate } from './gate.js'
+import { calculateGateCoordinates, validateGateSelection } from './util.js'
 import { gates } from './canvas.js'
 
-const handleMouseMove = (ev) => {
+const onCanvasMouseMove = (ev) => {
 
 }
 
-const handleMouseClick = (ev) => {
+const onCanvasMouseClick = (ev) => {
 
 }
 
-const handleMouseDown = (ev) => {
+const onCanvasMouseDown = (ev) => {
 
 }
 
-const handleMouseUp = (ev) => {
+const onCanvasMouseUp = (ev) => {
 
 }
-const handleRightClick = (ev) => {
+const onCanvasRightClick = (ev) => {
 
 }
 
-const andHandler = (ev) => {
-    checkGates(ev)
-    let [x, y] = getGateCoord(ev);
-    gates.push(new AND(x, y))
+const addAndGateHandler = (ev) => {
+    validateGateSelection(ev)
+    let [x, y] = calculateGateCoordinates(ev);
+    gates.push(new AndGate(x, y))
 }
 
-const notHandler = (ev) => {
-    checkGates(ev)
-    let [x, y] = getGateCoord(ev);
-    gates.push(new NOT(x, y))
+const addNotGateHandler = (ev) => {
+    validateGateSelection(ev)
+    let [x, y] = calculateGateCoordinates(ev);
+    gates.push(new NotGate(x, y))
 }
 
-const inHandler = (ev) => {
-    checkGates(ev)
-    let [x, y] = getGateCoord(ev)
-    gates.push(new IN(x, y))
+const addInputGateHandler = (ev) => {
+    validateGateSelection(ev)
+    let [x, y] = calculateGateCoordinates(ev)
+    gates.push(new InputGate(x, y))
 }
 
-const outHandler = (ev) => {
-    checkGates(ev)
-    let [x, y] = getGateCoord(ev);
-    gates.push(new OUT(x, y))
+const addOutputGateHandler = (ev) => {
+    validateGateSelection(ev)
+    let [x, y] = calculateGateCoordinates(ev);
+   
+    
+    gates.push(new OutputGate(x, y))
 }
 
-const menuClickHandler = (ev) => {
+const toggleMenuHandler = (ev) => {
     let menu_container = document.querySelector(".menu-items")
     menu_container.style.display = (menu_container.style.display == '' || menu_container.style.display == 'none') ? 'flex' : 'none';
 }
 
 
 export {
-    handleMouseMove, handleMouseClick, handleMouseDown,
-    handleMouseUp, handleRightClick, andHandler, notHandler,
-    inHandler, outHandler, menuClickHandler
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler
 }

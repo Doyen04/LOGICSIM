@@ -7,7 +7,7 @@ class CustomArray extends Array {
 
 }
 
-const getGateCoord = (ev) => {
+const calculateGateCoordinates = (ev) => {
     let circuitBoard = document.querySelector('#canvas')
     let sideBar = ev.target.getBoundingClientRect()
     let BoardRect = circuitBoard.getBoundingClientRect()
@@ -29,10 +29,11 @@ const getGateCoord = (ev) => {
     return [0, getY(sideBar.y - BoardRect.y)]
 }
 
-const checkGates = (ev) => {
+const validateGateSelection = (ev) => {
+    
     if (/*button_click &&*/ gates != '' && (gates[0].name != ev.target.getAttribute('name'))) {
         gates.reset()
     }
     // button_click = true
 }
-export { CustomArray, getGateCoord,checkGates }
+export { CustomArray, calculateGateCoordinates,validateGateSelection }

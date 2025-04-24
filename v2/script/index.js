@@ -1,7 +1,8 @@
 import { CANVAS, } from './canvas.js'
 import {
-    handleMouseMove, handleMouseClick, handleMouseDown, handleMouseUp,
-    handleRightClick, inHandler, outHandler, notHandler, andHandler, menuClickHandler
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler
 } from './eventhandler.js'
 
 
@@ -16,26 +17,26 @@ import {
 
 
 const menuToggleButton = document.querySelector('.menu')
-menuToggleButton.addEventListener('click', menuClickHandler)
+menuToggleButton.addEventListener('click', toggleMenuHandler)
 
 const andGateButton = document.querySelector('#and')
-andGateButton.addEventListener('click', andHandler)
+andGateButton.addEventListener('click', addAndGateHandler)
 
 
 const notGateButton = document.querySelector('#not')
-notGateButton.addEventListener('click', notHandler)
+notGateButton.addEventListener('click', addNotGateHandler)
 
 const inputGateButton = document.querySelector('#in')
-inputGateButton.addEventListener('click', inHandler)
+inputGateButton.addEventListener('click', addInputGateHandler)
 
 const outputGateButton = document.querySelector('#out')
-outputGateButton.addEventListener('click', outHandler)
+outputGateButton.addEventListener('click', addOutputGateHandler)
 
 const canvasElement = document.getElementById('canvas')
-canvasElement.addEventListener('mousemove', handleMouseMove)
-canvasElement.addEventListener('click', handleMouseClick)
-canvasElement.addEventListener('mousedown', handleMouseDown)
-canvasElement.addEventListener('mouseup', handleMouseUp)
-canvasElement.addEventListener('contextmenu', handleRightClick)
+canvasElement.addEventListener('mousemove', onCanvasMouseMove)
+canvasElement.addEventListener('click', onCanvasMouseClick)
+canvasElement.addEventListener('mousedown', onCanvasMouseDown)
+canvasElement.addEventListener('mouseup', onCanvasMouseUp)
+canvasElement.addEventListener('contextmenu', onCanvasRightClick)
 
-new CANVAS().render()
+new CANVAS().renderCanvas()
