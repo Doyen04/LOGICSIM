@@ -99,22 +99,22 @@ class Node {
     //     return {
     //         id: this.id,
     //         name: this.name,
-    //         custom_name: this.custom_name,
+    ////         custom_name: this.custom_name,
     //         x: this.x,
     //         y: this.y,
-    //         top: this.top,
-    //         bottom: this.bottom,
-    //         left: this.left,
-    //         right: this.right,
+           // // top: this.top,
+           // // bottom: this.bottom,
+           // // left: this.left,
+           // // right: this.right,
     //         stroke: this.stroke,
     //         fill: this.fill,
     //         w: this.w,
     //         h: this.h,
     //         inpin: this.inpin,
     //         outpin: this.outpin,
-    //         outlet: this.outlet,
-    //         inlet: this.inlet,
-    //         is_evaluated: false,
+    ////         outlet: this.outlet,
+    ////         inlet: this.inlet,
+    ////         is_evaluated: false,
     //     }
     // }
     
@@ -133,19 +133,19 @@ class ConnectionPin extends Node {
     //     return{
     //         ...super.toJSON(),
     //         parent : this.parent.id,
-    //         state : this.state,
+    ////         state : this.state,
     //         connected_nodes : this.ret(),
             
     //     }
     // }
-    // ret (){
-    //     let idArray = []
-    //     for (let xx = 0; xx < this.connected_nodes.length; xx++) {
-
-    //         idArray.push(this.connected_nodes[xx].id)
-    //     }
-    //     return idArray
-    // }
+    //// ret (){
+    ////     let idArray = []
+    ////     for (let xx = 0; xx < this.connected_nodes.length; xx++) {
+//
+    ////         idArray.push(this.connected_nodes[xx].id)
+   // //     }
+    ////     return idArray
+    //// }
     collide = (cx, cy) => {
         let dx = cx - this.x
         let dy = cy - this.y
