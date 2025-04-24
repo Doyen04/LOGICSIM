@@ -1,4 +1,3 @@
-
 import { CANVAS, } from './canvas.js'
 import {
     handleMouseMove, handleMouseClick, handleMouseDown, handleMouseUp,
@@ -16,27 +15,27 @@ import {
 // window.addEventListener('DOMContentLoaded', windowLoadHandler)
 
 
-const menuButton = document.querySelector('.menu')
-menuButton.addEventListener('click', menuClickHandler)
+const menuToggleButton = document.querySelector('.menu')
+menuToggleButton.addEventListener('click', menuClickHandler)
 
-const andButton = document.querySelector('#and')
-andButton.addEventListener('click', andHandler)
+const andGateButton = document.querySelector('#and')
+andGateButton.addEventListener('click', andHandler)
 
 
-const notButton = document.querySelector('#not')
-notButton.addEventListener('click', notHandler)
+const notGateButton = document.querySelector('#not')
+notGateButton.addEventListener('click', notHandler)
 
-const inButton = document.querySelector('#in')
-inButton.addEventListener('click', inHandler)
+const inputGateButton = document.querySelector('#in')
+inputGateButton.addEventListener('click', inHandler)
 
-const outButton = document.querySelector('#out')
-outButton.addEventListener('click', outHandler)
+const outputGateButton = document.querySelector('#out')
+outputGateButton.addEventListener('click', outHandler)
 
-const cnvs = document.getElementById('canvas')
-cnvs.addEventListener('mousemove', handleMouseMove)
-cnvs.addEventListener('click', handleMouseClick)
-cnvs.addEventListener('mousedown', handleMouseDown)
-cnvs.addEventListener('mouseup', handleMouseUp)
-cnvs.addEventListener('contextmenu', handleRightClick)
+const canvasElement = document.getElementById('canvas')
+canvasElement.addEventListener('mousemove', handleMouseMove)
+canvasElement.addEventListener('click', handleMouseClick)
+canvasElement.addEventListener('mousedown', handleMouseDown)
+canvasElement.addEventListener('mouseup', handleMouseUp)
+canvasElement.addEventListener('contextmenu', handleRightClick)
 
 new CANVAS().render()
