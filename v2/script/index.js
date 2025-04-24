@@ -1,9 +1,9 @@
-import { CANVAS, } from './canvas.js'
+import { canvas } from './canvas.js'
 import {
     onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
-    addInputGateHandler, addOutputGateHandler, toggleMenuHandler
-} from './eventhandler.js'
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, onCanvasMouseLeave
+} from './eventHandler.js'
 
 
 
@@ -38,5 +38,7 @@ canvasElement.addEventListener('click', onCanvasMouseClick)
 canvasElement.addEventListener('mousedown', onCanvasMouseDown)
 canvasElement.addEventListener('mouseup', onCanvasMouseUp)
 canvasElement.addEventListener('contextmenu', onCanvasRightClick)
+canvasElement.addEventListener('mouseenter', onCanvasMouseEnter)
+canvasElement.addEventListener('mouseleave', onCanvasMouseLeave)
 
-new CANVAS().renderCanvas()
+canvas.renderCanvas()

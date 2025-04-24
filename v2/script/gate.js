@@ -1,4 +1,4 @@
-import { CANVAS } from "./canvas.js"
+import { canvas } from "./canvas.js"
 
 
 class Node {
@@ -83,7 +83,7 @@ class Node {
         } return coord
     }
     renderNode = () => {
-        let new_cnvs = new CANVAS
+        let new_cnvs = canvas
         new_cnvs.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
         new_cnvs.drawText(this.x, this.y, this.w, this.h, this.name)
         this.inpin.forEach(pin => {
@@ -223,7 +223,7 @@ class InputGate extends Node {
     }
 
     renderNode = () => {
-        let new_cnvs = new CANVAS
+        let new_cnvs = canvas
         let sc = this.outlet
         new_cnvs.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
         new_cnvs.drawLine((this.x + (this.gap / 2)), this.y, sc.x, this.y, [], this.fill, 1)
@@ -274,7 +274,7 @@ class OutputGate extends Node {
 
     }
     renderNode = () => {
-        let new_cnvs = new CANVAS
+        let new_cnvs = canvas
         let sc = this.inlet
         this.state = sc.state
         let fill = (this.state == 0) ? 'blue' : 'red';

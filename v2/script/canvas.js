@@ -92,7 +92,7 @@ class CANVAS {
         })
     }
     renderLine = (points) => {
-        const radius = 10;
+        const radius = 5;
 
         canvasContext.strokeStyle = 'black';
         canvasContext.lineWidth = 5;
@@ -111,6 +111,8 @@ class CANVAS {
 
             const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
             const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
+            console.log(v1.vecLength() - radius, v2.vecLength() - radius);
+            
 
             const p1Start = new Vector(...p0).add(dir1); // Point to stop before corner
             const p1End = new Vector(...p2).minus(dir2); // Point to resume after corner
@@ -142,6 +144,8 @@ class CANVAS {
     }
 }
 
+const canvas = new CANVAS()
+
 const adjustCanvasSize = (ev) => {
     const section = document.querySelectorAll('.canvas-sidebar-container')[0]
     const root = document.documentElement
@@ -155,4 +159,4 @@ adjustCanvasSize()
 
 window.addEventListener('resize', adjustCanvasSize)
 
-export { CANVAS, gates, chipset }
+export { canvas, gates, chipset }

@@ -9,6 +9,16 @@ let isMouseDown = false
 let isMouseDrag = false
 let isAddGateButtonClick = false
 
+const onCanvasMouseEnter =(ev)=>{
+    mousePos.x = ev.offsetX
+    mousePos.y = ev.offsetY
+}
+//allow moving wwhen the mouse is out of the screen pls
+const onCanvasMouseLeave =(ev)=>{
+    mousePos.x = ev.offsetX
+    mousePos.y = ev.offsetY
+}
+
 const onCanvasMouseMove = (ev) => {
     // console.log(ev.offsetX, mousePos.x, ev.offsetX, mousePos.x);
 
@@ -25,7 +35,7 @@ const onCanvasMouseMove = (ev) => {
     // line_selected = temp_canvas_class.get_line_collision()
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
-
+    
 }
 
 const onCanvasMouseClick = (ev) => {
@@ -65,8 +75,6 @@ const addAndGateHandler = (ev) => {
     validateGateSelection(ev)
     let [x, y] = calculateGateCoordinates(ev);
     gates.push(new AndGate(x, y))
-    mousePos.x = x
-    mousePos.y = ev.y
     isAddGateButtonClick = true
 }
 
@@ -74,8 +82,6 @@ const addNotGateHandler = (ev) => {
     validateGateSelection(ev)
     let [x, y] = calculateGateCoordinates(ev);
     gates.push(new NotGate(x, y))
-    mousePos.x = x
-    mousePos.y = ev.y
     isAddGateButtonClick = true
 }
 
@@ -83,8 +89,6 @@ const addInputGateHandler = (ev) => {
     validateGateSelection(ev)
     let [x, y] = calculateGateCoordinates(ev)
     gates.push(new InputGate(x, y))
-    mousePos.x = x
-    mousePos.y = ev.y
     isAddGateButtonClick = true
 }
 
@@ -92,8 +96,6 @@ const addOutputGateHandler = (ev) => {
     validateGateSelection(ev)
     let [x, y] = calculateGateCoordinates(ev);
     gates.push(new OutputGate(x, y))
-    mousePos.x = x
-    mousePos.y = ev.y
     isAddGateButtonClick = true
 }
 
@@ -104,7 +106,7 @@ const toggleMenuHandler = (ev) => {
 
 
 export {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,onCanvasMouseLeave,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
-    addInputGateHandler, addOutputGateHandler, toggleMenuHandler
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter
 }
