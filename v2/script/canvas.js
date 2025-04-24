@@ -1,13 +1,9 @@
+import { CustomArray } from "./util.js" 
 
 let cnvs = document.querySelector('#canvas')
 let cnt = cnvs.getContext('2d')
 
-class CustomArray extends Array{
-    reset = ()=>{
-        this.length = 0
-    }
 
-}
 
 const gates = new CustomArray()
 const chipset = new CustomArray()
@@ -135,4 +131,5 @@ const handleWindowResize = (ev)=>{
 handleWindowResize()
 
 window.addEventListener('resize', handleWindowResize)
+
 export {CANVAS, gates}

@@ -304,30 +304,30 @@ class OUTPUT extends NODE {
     }
 }
 //another name for group
-class CUSTOM extends NODE {
-    constructor(name, fill, stroke, node_lst) {
-        super(0, 0, 'CUSTOM', fill, stroke)
-        this.custom_name = name
-        this.w = 0
-        this.h = 0
-        this.inpin = []
-        this.outpin = []
+// class CUSTOM extends NODE {
+//     constructor(name, fill, stroke, node_lst) {
+//         super(0, 0, 'CUSTOM', fill, stroke)
+//         this.custom_name = name
+//         this.w = 0
+//         this.h = 0
+//         this.inpin = []
+//         this.outpin = []
 
-    }
-    init = (node_lst) => {
-        let r = 6
-        //touch this
-        let inpins = node_list.filter(node => node.name == 'INPUT')
-        let outpins = node_list.filter(node => node.name == 'OUTPUT')
+//     }
+//     init = (node_lst) => {
+//         let r = 6
+//         //touch this
+//         let inpins = node_list.filter(node => node.name == 'INPUT')
+//         let outpins = node_list.filter(node => node.name == 'OUTPUT')
 
-        let pin_count = Math.max(inpins.length, outpins.length)
-        this.w = 80
-        this.h = (pin_count * (r * 3)) + (gap * (pin_count + 1))
-        // this.calculate_bounding_rect()
-        // this.calculate_pin_pos(inpin_len, outpin_len, r)
-        // this.draw()
-    }
+//         let pin_count = Math.max(inpins.length, outpins.length)
+//         this.w = 80
+//         this.h = (pin_count * (r * 3)) + (gap * (pin_count + 1))
+//         // this.calculate_bounding_rect()
+//         // this.calculate_pin_pos(inpin_len, outpin_len, r)
+//         // this.draw()
+//     }
 
-}
+// }
 
 export {AND, NOT, INPUT as IN, OUTPUT as OUT, };
