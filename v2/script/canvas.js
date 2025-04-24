@@ -1,12 +1,9 @@
-import { CustomArray } from "./util.js"
+import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos } from "./class.js"
+import {calculateAngle} from './util.js'
 
 let canvasElement = document.querySelector('#canvas')
 let canvasContext = canvasElement.getContext('2d')
 
-
-
-const gates = new CustomArray()
-const chipset = new CustomArray()
 
 class CANVAS {
     offset = 0
@@ -83,33 +80,58 @@ class CANVAS {
 
         }
     }
-    renderWires = () => {
-        this.offset = (this.offset + 1) % 100
-        wires.forEach(wire => {
-            let array = []
-            array.push([wire.out_node.x, wire.out_node.y])
-            array.push(...wire.connector)
-            array.push([wire.in_node.x, wire.in_node.y])
-            for (let c = 1; c < array.length; c++) {
-                let [x1, y1] = array[c - 1]
-                let [x2, y2] = array[c]
-
-                let [sx, sy] = line_selected.start_pos
-                let [ex, ey] = line_selected.end_pos
-                if (sx == x1 && sy == y1 && ex == x2 && ey == y2) {
-                    this.drawLine(x1, y1, x2, y2, [], 'white', 10)
-                }
-                let stroke = (wire.out_node.state == 0) ? 'black' : 'red'
-                let dash = (wire.out_node.state == 0) ? [] : [5, 10]
-                this.drawLine(x1, y1, x2, y2, dash, stroke, 5, this.offset)
-            }
+    renderLineConnection = () => {
+        let tempArray = connection.getArray()
+        
+        if (connection.getArray() != '') {
+            tempArray.push([mousePos.x, mousePos.y])
+            this.renderLine(tempArray)    
+        }
+        connectionList.forEach(connection =>{
+            this.renderLine(connection.getArray())
         })
     }
-    
+    renderLine = (points) => {
+        const radius = 10;
+
+        canvasContext.strokeStyle = 'black';
+        canvasContext.lineWidth = 5;
+        canvasContext.lineJoin = 'round';
+
+        canvasContext.beginPath();
+        canvasContext.moveTo(...points[0]);
+
+        for (let i = 0; i < points.length - 2; i++) {
+            const p0 = points[i];
+            const p1 = points[i + 1];
+            const p2 = points[i + 2];
+
+            const v1 = new Vector2(p0, p1);
+            const v2 = new Vector2(p1, p2);
+
+            const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
+            const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
+
+            const p1Start = new Vector(...p0).add(dir1); // Point to stop before corner
+            const p1End = new Vector(...p2).minus(dir2); // Point to resume after corner
+
+            const angle = calculateAngle(p0, p1, p2)
+            const adjustedRadius = (angle >= 90) ? radius : (angle * radius) / 90; // Adjust radius based on angle
+
+            canvasContext.lineTo(...p1Start);
+            canvasContext.arcTo(...p1, ...p1End, adjustedRadius);
+        }
+
+        // Final point
+        canvasContext.lineTo(...points[points.length - 1]);
+        canvasContext.stroke();
+    }
+
+
     renderCanvas = () => {
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height)
 
-        // if (temp_canvas_class != null) temp_canvas_class.draw_wires()
+        this.renderLineConnection()
         gates.forEach(gate => {
             gate.renderNode()
         })
@@ -133,4 +155,4 @@ adjustCanvasSize()
 
 window.addEventListener('resize', adjustCanvasSize)
 
-export { CANVAS, gates }
+export { CANVAS, gates, chipset }

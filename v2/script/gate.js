@@ -204,8 +204,8 @@ class InputGate extends Node {
         this.outlet.state = this.state
 
         //need to evaluate to calculate circuilt twice
-        evaluate_node_list()
-        evaluate_node_list()
+        // evaluate_node_list()
+        // evaluate_node_list()
 
     }
 
