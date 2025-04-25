@@ -16,12 +16,12 @@ class Node {
         this.fill = fill
         this.generateRandomId();
     }
-    generateRandomId () {
+    generateRandomId() {
         let result = ''
-        let array = [1, 2, 3, 4, 5, 6,7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+        let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
         for (let xx = 0; xx < 6; xx++) {
             result += array[Math.floor(Math.random() * array.length)]
-        } 
+        }
         this.id = result
     }
     isColliding = (cx, cy) => {
@@ -59,7 +59,7 @@ class Node {
         this.calculatePinPositions(inpin_len, outpin_len, r)
         this.renderNode()
     }
-    
+
     calculatePinPositions = (inpin_len, outpin_len, r) => {
         let in_y = this.distributeEvenly(this.y, (this.y + this.h), inpin_len, r)
         let out_y = this.distributeEvenly(this.y, (this.y + this.h), outpin_len, r)
@@ -95,29 +95,17 @@ class Node {
         })
 
     }
-    // toJSON () {
-    //     return {
-    //         id: this.id,
-    //         name: this.name,
-    ////         custom_name: this.custom_name,
-    //         x: this.x,
-    //         y: this.y,
-           // // top: this.top,
-           // // bottom: this.bottom,
-           // // left: this.left,
-           // // right: this.right,
-    //         stroke: this.stroke,
-    //         fill: this.fill,
-    //         w: this.w,
-    //         h: this.h,
-    //         inpin: this.inpin,
-    //         outpin: this.outpin,
-    ////         outlet: this.outlet,
-    ////         inlet: this.inlet,
-    ////         is_evaluated: false,
-    //     }
-    // }
-    
+    toJSON() {
+        return {
+            id: this.id,
+            name: this.name,
+            x: this.x,
+            y: this.y,
+            stroke: this.stroke,
+            fill: this.fill,
+        }
+    }
+
 }
 
 class ConnectionPin extends Node {
@@ -127,25 +115,21 @@ class ConnectionPin extends Node {
         this.connected_nodes = []
         this.state = 0
         this.r = r
-        this.outpin = []
+        // this.outpin = []
     }
-    // toJSON = ()=>{
-    //     return{
-    //         ...super.toJSON(),
-    //         parent : this.parent.id,
-    ////         state : this.state,
-    //         connected_nodes : this.ret(),
-            
-    //     }
-    // }
-    //// ret (){
-    ////     let idArray = []
-    ////     for (let xx = 0; xx < this.connected_nodes.length; xx++) {
-//
-    ////         idArray.push(this.connected_nodes[xx].id)
-   // //     }
-    ////     return idArray
-    //// }
+    toJSON() {
+        // Check if this pin is an outpin
+        const isOutPin = ((this.parent.outlet == this) || this.parent.outpin?.includes(this))
+        return {
+            id: this.id,
+            name: this.name,
+            x: this.x,
+            y: this.y,
+            r: this.r,
+            state: this.state,
+            ...(isOutPin && { connected_nodes: this.connected_nodes.map(node => node.id) }), // Include connected_nodes only for outpins
+        };
+    }
     collide = (cx, cy) => {
         let dx = cx - this.x
         let dy = cy - this.y
@@ -170,6 +154,16 @@ class AndGate extends Node {
         this.outpin[0].state = (this.inpin[0].state == 1 && this.inpin[1].state == 1) ? 1 : 0;
         console.log('and', this.outpin[0].state);
     }
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            w: this.w,
+            h: this.h,
+            inpin: this.inpin.map(pin => pin.toJSON()), // Serialize pins
+            outpin: this.outpin.map(pin => pin.toJSON()), //
+        }
+    }
+
 }
 
 class NotGate extends Node {
@@ -186,6 +180,16 @@ class NotGate extends Node {
         this.outpin[0].state = (this.inpin[0].state == 0) ? 1 : 0;
         console.log('not', this.outpin[0].state);
     }
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            w: this.w,
+            h: this.h,
+            inpin: this.inpin.map(pin => pin.toJSON()), // Serialize pins
+            outpin: this.outpin.map(pin => pin.toJSON()), //
+        }
+    }
+
 }
 
 class InputGate extends Node {
@@ -249,6 +253,15 @@ class InputGate extends Node {
 
         return (dist < (this.r * this.r)) ? true : false
     }
+    toJSON() {
+        return {
+            ...super.toJSON(), // Include properties from the parent class
+            state: this.state, // Add additional properties specific to InputGate
+            outlet: this.outlet.toJSON(), // Serialize pins
+            r: this.r,
+            gap: this.gap
+        };
+    }
 }
 
 class OutputGate extends Node {
@@ -302,33 +315,15 @@ class OutputGate extends Node {
 
         return (dist < (this.r * this.r)) ? true : false
     }
+    toJSON() {
+        return {
+            ...super.toJSON(), // Include properties from the parent class
+            state: this.state, // Add additional properties specific to InputGate
+            inlet: this.inlet.toJSON(), // Serialize pins
+            r: this.r,
+            gap: this.gap
+        };
+    }
 }
 
-//another name for group
-// class CUSTOM extends NODE {
-//     constructor(name, fill, stroke, node_lst) {
-//         super(0, 0, 'CUSTOM', fill, stroke)
-//         this.custom_name = name
-//         this.w = 0
-//         this.h = 0
-//         this.inpin = []
-//         this.outpin = []
-
-//     }
-//     init = (node_lst) => {
-//         let r = 6
-//         //touch this
-//         let inpins = node_list.filter(node => node.name == 'INPUT')
-//         let outpins = node_list.filter(node => node.name == 'OUTPUT')
-
-//         let pin_count = Math.max(inpins.length, outpins.length)
-//         this.w = 80
-//         this.h = (pin_count * (r * 3)) + (gap * (pin_count + 1))
-//         // this.calculate_bounding_rect()
-//         // this.calculate_pin_pos(inpin_len, outpin_len, r)
-//         // this.draw()
-//     }
-
-// }
-
-export {AndGate, NotGate, InputGate, OutputGate, };
+export { AndGate, NotGate, InputGate, OutputGate, };

@@ -83,7 +83,7 @@ class CANVAS {
     renderLineConnection = () => {
         let tempArray = connection.getArray()
         
-        if (connection.getArray() != '') {
+        if (tempArray != '') {
             tempArray.push([mousePos.x, mousePos.y])
             this.renderLine(tempArray)    
         }
@@ -159,4 +159,4 @@ adjustCanvasSize()
 
 window.addEventListener('resize', adjustCanvasSize)
 
-export { canvas, gates, chipset }
+export { canvas }

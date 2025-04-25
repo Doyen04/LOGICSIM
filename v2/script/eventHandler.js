@@ -1,7 +1,6 @@
 import { AndGate, NotGate, InputGate, OutputGate } from './gate.js'
 import { calculateGateCoordinates, validateGateSelection, dragLogic, toggleInput, createConnection } from './util.js'
-import { gates, chipset } from './canvas.js'
-import { mousePos } from './class.js'
+import { gates, chipset, mousePos, connectionList } from './class.js'
 
 
 // let mousePos = { x: 0, y: 0 }
@@ -9,18 +8,17 @@ let isMouseDown = false
 let isMouseDrag = false
 let isAddGateButtonClick = false
 
-const onCanvasMouseEnter =(ev)=>{
+const onCanvasMouseEnter = (ev) => {
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
 }
 //allow moving wwhen the mouse is out of the screen pls
-const onCanvasMouseLeave =(ev)=>{
+const onCanvasMouseLeave = (ev) => {
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
 }
 
 const onCanvasMouseMove = (ev) => {
-    // console.log(ev.offsetX, mousePos.x, ev.offsetX, mousePos.x);
 
     let newx = ev.offsetX - mousePos.x
     let newy = ev.offsetY - mousePos.y
@@ -35,7 +33,7 @@ const onCanvasMouseMove = (ev) => {
     // line_selected = temp_canvas_class.get_line_collision()
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
-    
+
 }
 
 const onCanvasMouseClick = (ev) => {
@@ -104,9 +102,29 @@ const toggleMenuHandler = (ev) => {
     menu_container.style.display = (menu_container.style.display == '' || menu_container.style.display == 'none') ? 'flex' : 'none';
 }
 
+const saveToLocalStorage = () => {
+
+    const serializedData = {
+        nodes: chipset.map(node => node.toJSON()), // Serialize all nodes
+        connection: connectionList.map(wire => ({
+            sourcePin: wire.sourcePin.id,
+            destinationPin: wire.destinationPin.id,
+            connectionCoord: wire.connectionCoord,
+        })), // Serialize wires
+    };
+    console.dir(serializedData, { depth: null, colors: true });
+
+    const name = prompt('Enter a name for your circuit:');
+    if (name) {
+        localStorage.setItem(name, JSON.stringify(serializedData));
+        console.log(`Circuit saved as "${name}"`);
+    } else {
+        console.log('Save canceled.');
+    }
+};
 
 export {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,onCanvasMouseLeave,
-    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler, saveToLocalStorage,
     addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter
 }
