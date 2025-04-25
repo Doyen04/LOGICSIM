@@ -53,8 +53,6 @@ class Node {
             this.outpin.push(new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,))
         }
         //touch this
-        this.w = 80
-        this.h = 40
         this.calculateBoundingBox()
         this.calculatePinPositions(inpin_len, outpin_len, r)
         this.renderNode()
@@ -143,8 +141,8 @@ class AndGate extends Node {
 
     constructor(x, y, fill = 'brown', stroke = 'grey') {
         super(x, y, 'AND', fill, stroke)
-        this.w = 0
-        this.h = 0
+        this.w = 80
+        this.h = 40
         this.inpin = []
         this.outpin = []
         this.is_evaluated = false
@@ -169,8 +167,8 @@ class AndGate extends Node {
 class NotGate extends Node {
     constructor(x, y, fill = 'green', stroke = 'indigo') {
         super(x, y, 'NOT', fill, stroke)
-        this.w = 0
-        this.h = 0
+        this.w = 80
+        this.h = 40
         this.inpin = []
         this.outpin = []
         this.is_evaluated = false
@@ -326,4 +324,22 @@ class OutputGate extends Node {
     }
 }
 
-export { AndGate, NotGate, InputGate, OutputGate, };
+class CompoundGate extends Node {
+    constructor(x, y, name, fill, stroke) {
+        super(x, y, name, fill, stroke)
+        this.w = 0
+        this.h = 0
+        this.inpin = []
+        this.outpin = []
+        this.is_evaluated = false
+        this.init()
+    }
+    init = () => {
+        let inpinLen = this.getInpinLength()
+        let outpinLen = this.getOutpinLength()
+        super.init()
+    }
+    
+}
+
+export { AndGate, NotGate, InputGate, OutputGate, CompoundGate };

@@ -1,12 +1,26 @@
-import { AndGate, NotGate, InputGate, OutputGate } from './gate.js'
-import { calculateGateCoordinates, validateGateSelection, dragLogic, toggleInput, createConnection } from './util.js'
+import { AndGate, NotGate, InputGate, OutputGate, CompoundGate } from './gate.js'
+import {
+    calculateGateCoordinates, validateGateSelection, dragLogic,
+    toggleInput, createConnection
+} from './util.js'
 import { gates, chipset, mousePos, connectionList } from './class.js'
 
 
-// let mousePos = { x: 0, y: 0 }
+let windowMousePos = { x: 0, y: 0 }
 let isMouseDown = false
 let isMouseDrag = false
 let isAddGateButtonClick = false
+
+const windowWideClick = (event) => {
+    console.log(event);
+
+    const canvas = document.getElementById('myCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    windowMousePos.x = ((x > 0) ? x : 0)
+    windowMousePos.y = ((y > 0) ? y : 0)
+}
 
 const onCanvasMouseEnter = (ev) => {
     mousePos.x = ev.offsetX
@@ -140,7 +154,7 @@ const displayLibrary = () => {
         item.innerHTML = `
             <h3  data-key="${key}">${key}</h3>
             <button class="delete-button" data-key="${key}">
-                <img class="delete-icon" src="./assets/cancel.png" />
+                <img class="delete-icon" src="./assets/mini-cancel.png" />
             </button>
         `;
 
@@ -154,13 +168,20 @@ const displayLibrary = () => {
 
 }
 
-const loadCircuit = () => {
-    
+const loadCircuit = (ev) => {
+    const key = ev.currentTarget.dataset.key;
+    validateGateSelection(ev)
+    let [x, y] = calculateGateCoordinates(ev)
+    console.log(x, y, windowMousePos, ev);
+
+    // gates.push(new CompoundGate(x, y))
+    isAddGateButtonClick = true
 }
 
-const deleteCircuit = (ev) => { ev.stopPropagation()
+
+const deleteCircuit = (ev) => {
     const key = ev.currentTarget.dataset.key;
-    
+
     if (confirm(`Are you sure you want to delete the circuit "${key}"?`)) {
         localStorage.removeItem(key);
         console.log(`Circuit "${key}" deleted.`);
