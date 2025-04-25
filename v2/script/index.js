@@ -1,6 +1,6 @@
 import { canvas } from './canvas.js'
 import {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown,
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, saveToLocalStorage,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
     addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, onCanvasMouseLeave
 } from './eventHandler.js'
@@ -15,6 +15,11 @@ import {
 // }
 // window.addEventListener('DOMContentLoaded', windowLoadHandler)
 
+const saveAs = document.querySelector('.saveas')
+saveAs.addEventListener('click', saveToLocalStorage)
+
+const library = document.querySelector('.library')
+library.addEventListener('click', displayLibrary)
 
 const menuToggleButton = document.querySelector('.menu')
 menuToggleButton.addEventListener('click', toggleMenuHandler)
