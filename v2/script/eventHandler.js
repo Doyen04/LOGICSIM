@@ -123,8 +123,57 @@ const saveToLocalStorage = () => {
     }
 };
 
+const displayLibrary = () => {
+    toggleMenuHandler()
+    let modal = document.querySelector('.floating-sidebar');
+    modal.classList.toggle('toggle-sidebar');
+
+    let container = document.querySelector('.library-container');
+    container.innerHTML = ''; // Clear previous content
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i); // Get the key (circuit name)
+
+        // Create an element for each library item
+        let item = document.createElement('article');
+        item.classList.add('chips');
+        item.innerHTML = `
+            <h3  data-key="${key}">${key}</h3>
+            <button class="delete-button" data-key="${key}">
+                <img class="delete-icon" src="./assets/cancel.png" />
+            </button>
+        `;
+
+        // Append the item to the container
+        item.addEventListener('click', loadCircuit)
+        container.appendChild(item);
+    }
+    container.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', deleteCircuit);
+    });
+
+}
+
+const loadCircuit = () => {
+    
+}
+
+const deleteCircuit = (ev) => { ev.stopPropagation()
+    const key = ev.currentTarget.dataset.key;
+    
+    if (confirm(`Are you sure you want to delete the circuit "${key}"?`)) {
+        localStorage.removeItem(key);
+        console.log(`Circuit "${key}" deleted.`);
+        displayLibrary(); // Refresh the library display
+    }
+}
+
+const closeLibrary = () => {
+    let modal = document.querySelector('.floating-sidebar');
+    modal.classList.toggle('toggle-sidebar');
+}
 export {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave,
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave, displayLibrary,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler, saveToLocalStorage,
-    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, closeLibrary
 }
