@@ -145,6 +145,7 @@ const displayLibrary = () => {
         `;
 
         // Append the item to the container
+        item.setAttribute('name', key)
         item.addEventListener('click', loadCircuit)
         container.appendChild(item);
     }
@@ -154,13 +155,37 @@ const displayLibrary = () => {
 
 }
 
-const loadCircuit = () => {
-    
+const loadCircuit = (ev) => {
+
+    validateGateSelection(ev)
+    let [x, y] = calculateCompoundGateCoordinates(ev)
+    gates.push(new NotGate(x - 50, y))
+    isAddGateButtonClick = true
 }
 
-const deleteCircuit = (ev) => { ev.stopPropagation()
-    const key = ev.currentTarget.dataset.key;
+const calculateCompoundGateCoordinates = (ev) => {
+    let parentCoord = ev.target.parentElement.getBoundingClientRect()
+    let canvasCoord = document.querySelector('#canvas').getBoundingClientRect()
+    let buttonCoord = ev.target.getBoundingClientRect()
     
+    const getY = (y) => {
+        let lastY = y
+        let yGap = 5
+        if (gates != '') {
+            lastY = gates.at(-1).bottom + (yGap)
+        }
+        return lastY
+    }
+    // mouse_pos = { x: 0, y: sideBar.y - BoardRect.y }
+
+    return [parentCoord.x - canvasCoord.x, getY(buttonCoord.y - canvasCoord.y)]
+}
+
+
+const deleteCircuit = (ev) => {
+    ev.stopPropagation()
+    const key = ev.currentTarget.dataset.key;
+
     if (confirm(`Are you sure you want to delete the circuit "${key}"?`)) {
         localStorage.removeItem(key);
         console.log(`Circuit "${key}" deleted.`);

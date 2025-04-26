@@ -177,6 +177,7 @@ header {
     flex-direction: column;
     gap: 5px;
     padding: 5px;
+    background-color: red;
 }
 
 .chips {

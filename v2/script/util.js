@@ -8,13 +8,13 @@ const calculateGateCoordinates = (ev) => {
     const getY = (y) => {
         let lastY = y
         let yGap = 5
-        gates.forEach((gate) => {
-            if (gate.name == ('INPUT') || gate.name == ('OUTPUT')) {
-                lastY = gate.bottom + gate.r + yGap
+        if (gates != '') {
+            if (gates.at(-1).name == ('INPUT') || gates.at(-1).name == ('OUTPUT')) {
+                lastY = gates.at(-1).bottom + gates.at(-1).r + yGap
             } else {
-                lastY = gate.bottom + (yGap)
+                lastY = gates.at(-1).bottom + (yGap)
             }
-        })
+        }
         return lastY
     }
     // mouse_pos = { x: 0, y: sideBar.y - BoardRect.y }
@@ -24,7 +24,8 @@ const calculateGateCoordinates = (ev) => {
 
 const validateGateSelection = (ev) => {
 
-    if (/*button_click &&*/ gates != '' && (gates[0].name != ev.target.getAttribute('name'))) {
+    if (/*button_click &&*/ gates != '' &&
+        (gates[0].name.toLowerCase() != ev.currentTarget.getAttribute('name').toLowerCase())) {
         gates.reset()
     }
     // button_click = true
@@ -149,7 +150,7 @@ const createConnection = (ev) => {
         // Reset connection and re-evaluate the node list
         connection.reset()
         console.log(connectionList);
-        
+
         // evaluate_node_list();
     }
 };
