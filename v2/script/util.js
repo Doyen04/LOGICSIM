@@ -1,4 +1,25 @@
-import { chipset, gates, connection, connectionList, Vector } from "./class.js"
+import {
+    chipset, gates, connection, connectionList, Vector, mousePos
+} from "./class.js"
+
+const calculateCompoundGateCoordinates = (ev) => {
+    let parentCoord = ev.target.parentElement.getBoundingClientRect()
+    let canvasCoord = document.querySelector('#canvas').getBoundingClientRect()
+    let buttonCoord = ev.target.getBoundingClientRect()
+
+    const getY = (y) => {
+        let lastY = y
+        let yGap = 5
+        if (gates != '') {
+            lastY = gates.at(-1).bottom + (yGap)
+        }
+        return lastY
+    }
+    mousePos.x = parentCoord.x - canvasCoord.x
+    mousePos.y = buttonCoord.y - canvasCoord.y
+
+    return [parentCoord.x - canvasCoord.x, getY(buttonCoord.y - canvasCoord.y)]
+}
 
 const calculateGateCoordinates = (ev) => {
     let circuitBoard = document.querySelector('#canvas')
@@ -17,8 +38,8 @@ const calculateGateCoordinates = (ev) => {
         }
         return lastY
     }
-    // mouse_pos = { x: 0, y: sideBar.y - BoardRect.y }
-
+    mousePos.x = 0
+    mousePos.y = sideBar.y - BoardRect.y
     return [0, getY(sideBar.y - BoardRect.y)]
 }
 
@@ -179,6 +200,6 @@ function calculateAngle(p0, p1, p2) {
 
 
 export {
-    calculateGateCoordinates, validateGateSelection,
+    calculateGateCoordinates, validateGateSelection, calculateCompoundGateCoordinates,
     dragLogic, toggleInput, createConnection, calculateAngle
 }

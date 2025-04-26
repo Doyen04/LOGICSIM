@@ -1,5 +1,8 @@
 import { AndGate, NotGate, InputGate, OutputGate } from './gate.js'
-import { calculateGateCoordinates, validateGateSelection, dragLogic, toggleInput, createConnection } from './util.js'
+import {
+    calculateGateCoordinates, validateGateSelection,
+    dragLogic, toggleInput, createConnection, calculateCompoundGateCoordinates
+} from './util.js'
 import { gates, chipset, mousePos, connectionList } from './class.js'
 
 
@@ -9,13 +12,18 @@ let isMouseDrag = false
 let isAddGateButtonClick = false
 
 const onCanvasMouseEnter = (ev) => {
-    mousePos.x = ev.offsetX
-    mousePos.y = ev.offsetY
+    // mousePos.x = ev.offsetX
+    // mousePos.y = ev.offsetY
 }
 //allow moving wwhen the mouse is out of the screen pls
 const onCanvasMouseLeave = (ev) => {
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
+
+    chipset.push(...gates)
+    gates.reset()
+    isAddGateButtonClick = false
+    isMouseDrag = false
 }
 
 const onCanvasMouseMove = (ev) => {
@@ -161,24 +169,6 @@ const loadCircuit = (ev) => {
     let [x, y] = calculateCompoundGateCoordinates(ev)
     gates.push(new NotGate(x - 50, y))
     isAddGateButtonClick = true
-}
-
-const calculateCompoundGateCoordinates = (ev) => {
-    let parentCoord = ev.target.parentElement.getBoundingClientRect()
-    let canvasCoord = document.querySelector('#canvas').getBoundingClientRect()
-    let buttonCoord = ev.target.getBoundingClientRect()
-    
-    const getY = (y) => {
-        let lastY = y
-        let yGap = 5
-        if (gates != '') {
-            lastY = gates.at(-1).bottom + (yGap)
-        }
-        return lastY
-    }
-    // mouse_pos = { x: 0, y: sideBar.y - BoardRect.y }
-
-    return [parentCoord.x - canvasCoord.x, getY(buttonCoord.y - canvasCoord.y)]
 }
 
 
