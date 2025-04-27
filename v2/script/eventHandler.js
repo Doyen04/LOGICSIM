@@ -1,7 +1,8 @@
-import { AndGate, NotGate, InputGate, OutputGate } from './gate.js'
+import { AndGate, NotGate, InputGate, OutputGate, CompoundGate } from './gate.js'
 import {
     calculateGateCoordinates, validateGateSelection,
-    dragLogic, toggleInput, createConnection, calculateCompoundGateCoordinates
+    dragLogic, toggleInput, createConnection, calculateCompoundGateCoordinates,
+    generateRandomColor
 } from './util.js'
 import { gates, chipset, mousePos, connectionList } from './class.js'
 
@@ -119,6 +120,8 @@ const saveToLocalStorage = () => {
             destinationPin: wire.destinationPin.id,
             connectionCoord: wire.connectionCoord,
         })), // Serialize wires
+        fill: generateRandomColor(),
+        stroke: generateRandomColor(),
     };
     console.dir(serializedData, { depth: null, colors: true });
 
@@ -164,18 +167,22 @@ const displayLibrary = () => {
 }
 
 const loadCircuit = (ev) => {
-
+    const key = ev.currentTarget.getAttribute('name');
+    const circuitObject = JSON.parse(localStorage.getItem(key))
     validateGateSelection(ev)
+    console.log(circuitObject['fill'], circuitObject['stroke']);
+    
     let [x, y] = calculateCompoundGateCoordinates(ev)
-    gates.push(new NotGate(x - 50, y))
+    gates.push(new CompoundGate(x - 50, y, key,circuitObject['fill'], circuitObject['stroke']))
+    console.log(gates[0]);
     isAddGateButtonClick = true
 }
 
 
 const deleteCircuit = (ev) => {
-    ev.stopPropagation()
+    //ev.stopPropagation()
     const key = ev.currentTarget.dataset.key;
-
+    //add error handling
     if (confirm(`Are you sure you want to delete the circuit "${key}"?`)) {
         localStorage.removeItem(key);
         console.log(`Circuit "${key}" deleted.`);

@@ -2,6 +2,15 @@ import {
     chipset, gates, connection, connectionList, Vector, mousePos
 } from "./class.js"
 
+const generateRandomColor =() =>{
+    let result = '#'
+    let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+    for (let xx = 0; xx < 6; xx++) {
+        result += array[Math.floor(Math.random() * array.length)]
+    }
+    return result
+}
+
 const calculateCompoundGateCoordinates = (ev) => {
     let parentCoord = ev.target.parentElement.getBoundingClientRect()
     let canvasCoord = document.querySelector('#canvas').getBoundingClientRect()
@@ -201,5 +210,5 @@ function calculateAngle(p0, p1, p2) {
 
 export {
     calculateGateCoordinates, validateGateSelection, calculateCompoundGateCoordinates,
-    dragLogic, toggleInput, createConnection, calculateAngle
+    dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor
 }
