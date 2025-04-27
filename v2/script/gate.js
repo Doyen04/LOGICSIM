@@ -365,7 +365,7 @@ class CompoundGate extends Node {
     calculateOutpinLen() {
         let circuitObject = JSON.parse(localStorage.getItem(this.name))
         let outputArray = Array.from(circuitObject['nodes']).filter(node => node.name == 'OUTPUT');
-        return outputArray.length
+        return outputArray.length 
     }
 
 }
