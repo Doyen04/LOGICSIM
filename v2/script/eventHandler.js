@@ -4,7 +4,7 @@ import {
     dragLogic, toggleInput, createConnection, calculateCompoundGateCoordinates,
     generateRandomColor
 } from './util.js'
-import { gates, chipset, mousePos, connectionList } from './class.js'
+import { gates, chipset, mousePos, connectionList, connection } from './class.js'
 
 
 // let mousePos = { x: 0, y: 0 }
@@ -75,7 +75,10 @@ const onCanvasMouseUp = (ev) => {
 
 }
 const onCanvasRightClick = (ev) => {
-    console.log(isAddGateButtonClick, isMouseDown,isMouseDrag, 99);
+    ev.preventDefault()
+    if(connection.destinationPin == '' || connection.sourcePin == ''){
+        connection.reset()
+    }
     
 }
 
