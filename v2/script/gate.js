@@ -1,4 +1,5 @@
 import { canvas } from "./canvas.js"
+import { chipset } from "./class.js"
 import { evaluateChip } from "./util.js"
 
 
@@ -126,7 +127,7 @@ class ConnectionPin extends Node {
             x: this.x,
             y: this.y,
             r: this.r,
-            state: this.state,
+            state: 0,
             ...(isOutPin && { connected_nodes: this.connected_nodes.map(node => node.id) }), // Include connected_nodes only for outpins
         };
     }
@@ -213,7 +214,7 @@ class InputGate extends Node {
         this.outlet.state = this.state
 
         //need to evaluate to calculate circuilt twice
-        evaluateChip()
+        evaluateChip(chipset)
         // evaluate_node_list()
 
     }
@@ -267,7 +268,7 @@ class InputGate extends Node {
     toJSON() {
         return {
             ...super.toJSON(), // Include properties from the parent class
-            state: this.state, // Add additional properties specific to InputGate
+            state: 0, // Add additional properties specific to InputGate
             outlet: this.outlet.toJSON(), // Serialize pins
             r: this.r,
             gap: this.gap
@@ -335,7 +336,7 @@ class OutputGate extends Node {
     toJSON() {
         return {
             ...super.toJSON(), // Include properties from the parent class
-            state: this.state, // Add additional properties specific to InputGate
+            state: 0, // Add additional properties specific to InputGate
             inlet: this.inlet.toJSON(), // Serialize pins
             r: this.r,
             gap: this.gap
@@ -361,6 +362,21 @@ class CompoundGate extends Node {
         this.h = this.calculateHeight(inpinLen, outpinLen)
         super.init(inpinLen, outpinLen)
     }
+    // evaluate(){
+    //     let circuitObject = JSON.parse(localStorage.getItem(this.name))
+    //     let constructedObj = []
+    //     circuitObject.forEach(obj =>{
+    //         if (obj.name == 'INPUT') {
+                
+    //         }else if(obj.name == 'NOT'){
+
+    //         }else if(obj.name == 'AND'){
+
+    //         }else if(obj.name == 'OUTPUT'){
+
+    //         }
+    //     })
+    // }
     calculateHeight(inpinLen, outpinLen) {
         let horizontalGap = 8
         let pinLen = Math.max(inpinLen, outpinLen)

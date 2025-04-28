@@ -2,8 +2,8 @@ import {
     chipset, gates, connection, connectionList, Vector, mousePos
 } from "./class.js"
 
-const evaluateChip = () => {
-    let evaluationList = chipset.filter(chip => chip.name == "INPUT")
+const evaluateChip = (chip) => {
+    let evaluationList = chip.filter(chip => chip.name == "INPUT")
     let evaluatedChips = []
 
     while (evaluationList.length > 0) {
