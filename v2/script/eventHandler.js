@@ -75,7 +75,8 @@ const onCanvasMouseUp = (ev) => {
 
 }
 const onCanvasRightClick = (ev) => {
-
+    console.log(isAddGateButtonClick, isMouseDown,isMouseDrag, 99);
+    
 }
 
 const addAndGateHandler = (ev) => {
@@ -170,11 +171,11 @@ const loadCircuit = (ev) => {
     const key = ev.currentTarget.getAttribute('name');
     const circuitObject = JSON.parse(localStorage.getItem(key))
     validateGateSelection(ev)
-    console.log(circuitObject['fill'], circuitObject['stroke']);
+    // console.log(circuitObject['fill'], circuitObject['stroke']);
     
     let [x, y] = calculateCompoundGateCoordinates(ev)
     gates.push(new CompoundGate(x - 50, y, key,circuitObject['fill'], circuitObject['stroke']))
-    console.log(gates[0]);
+    // console.log(gates[0]);
     isAddGateButtonClick = true
 }
 

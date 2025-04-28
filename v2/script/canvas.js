@@ -111,7 +111,7 @@ class CANVAS {
 
             const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
             const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
-            console.log(v1.vecLength() - radius, v2.vecLength() - radius);
+            // console.log(v1.vecLength() - radius, v2.vecLength() - radius);
             
 
             const p1Start = new Vector(...p0).add(dir1); // Point to stop before corner

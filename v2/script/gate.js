@@ -1,4 +1,5 @@
 import { canvas } from "./canvas.js"
+import { evaluateChip } from "./util.js"
 
 
 class Node {
@@ -151,7 +152,9 @@ class AndGate extends Node {
     }
     evaluate() {
         this.outpin[0].state = (this.inpin[0].state == 1 && this.inpin[1].state == 1) ? 1 : 0;
-        console.log('and', this.outpin[0].state);
+        this.outpin[0].connected_nodes.forEach(node =>{
+            node.state = this.outpin[0].state
+        })
     }
     toJSON() {
         return {
@@ -177,7 +180,10 @@ class NotGate extends Node {
     }
     evaluate() {
         this.outpin[0].state = (this.inpin[0].state == 0) ? 1 : 0;
-        console.log('not', this.outpin[0].state);
+        this.outpin[0].connected_nodes.forEach(node =>{
+            node.state = this.outpin[0].state
+        })
+        // console.log('not', this.outpin[0].state);
     }
     toJSON() {
         return {
@@ -202,14 +208,20 @@ class InputGate extends Node {
     }
     toogle_state() {
         this.state = (this.state == 0) ? 1 : 0;
-        console.log(this.state);
+        // console.log(this.state);
         this.fill = (this.state == 0) ? 'blue' : 'red';
         this.outlet.state = this.state
 
         //need to evaluate to calculate circuilt twice
-        // evaluate_node_list()
+        evaluateChip()
         // evaluate_node_list()
 
+    }
+    evaluate(){
+        this.outlet.state = this.state
+        this.outlet.connected_nodes.forEach(node =>{
+            node.state = this.state
+        })
     }
 
     init() {
@@ -286,10 +298,15 @@ class OutputGate extends Node {
         this.inlet.y = y
 
     }
+    evaluate(){
+        this.state = this.inlet.state
+        // console.log(7777, this.state, this.inlet.state);
+        
+    }
     renderNode() {
         let new_cnvs = canvas
         let sc = this.inlet
-        this.state = sc.state
+        // this.state = sc.state
         let fill = (this.state == 0) ? 'blue' : 'red';
         new_cnvs.drawLine(this.x, this.y, sc.x, this.y, [], fill, 1)
         new_cnvs.drawCircle(this.x, this.y, this.r, fill, this.stroke)

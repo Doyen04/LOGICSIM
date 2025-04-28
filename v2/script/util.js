@@ -2,7 +2,69 @@ import {
     chipset, gates, connection, connectionList, Vector, mousePos
 } from "./class.js"
 
-const generateRandomColor =() =>{
+const evaluateChip = () => {
+    let evaluationList = chipset.filter(chip => chip.name == "INPUT")
+    let evaluatedChips = []
+
+    while (evaluationList.length > 0) {
+        let evaluated = getEvaluated(evaluatedChips, evaluationList)
+
+        if (evaluated.length > 0) {
+            reEvaluation(evaluated)
+        }
+        //filter out non evaluated
+        let nonEvaluated = getNonEvaluated(evaluatedChips, evaluationList)
+        evaluationList = evaluation(nonEvaluated)
+        evaluatedChips.push(...nonEvaluated)
+
+    }
+
+}
+const reEvaluation = (evaluated) => {
+    let evaluationList = evaluation(evaluated)
+    let touched = getEvaluated(evaluated, evaluationList)
+
+    while (touched.length == 0) {
+        let resultList = evaluation(evaluationList)
+        evaluationList = resultList
+        touched = getEvaluated(evaluated, evaluationList)
+    }
+}
+const evaluation = (toEvaluate) => {
+    let nextGate = []
+    toEvaluate.forEach(node => {
+        node.evaluate()
+    })
+    toEvaluate.forEach(node => {
+        if (node.name == 'INPUT') {
+            node.outlet.connected_nodes.forEach(subnode => {
+                nextGate.push(subnode.parent)
+            })
+        } else if (node.name != 'OUTPUT') {
+            node.outpin.forEach(outpin => {
+                outpin.connected_nodes.forEach(subnode => {
+                    nextGate.push(subnode.parent)
+                })
+            })
+        }
+    })
+    return nextGate
+}
+const getNonEvaluated = (evaluated, evaluationList) => {
+    const nonEvaluatedChip = evaluationList.filter(chip =>
+        !evaluated.some(eChip => eChip.id == chip.id)
+    )
+    return nonEvaluatedChip;
+}
+
+const getEvaluated = (evaluated, evaluationList) => {
+    const evaluatedChip = evaluationList.filter(chip =>
+        evaluated.some(eChip => eChip.id == chip.id)
+    )
+    return evaluatedChip;
+}
+
+const generateRandomColor = () => {
     let result = '#'
     let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
     for (let xx = 0; xx < 6; xx++) {
@@ -72,7 +134,7 @@ function toggleInput(ev) {
     chipset.forEach(node => {
         if (node.name == 'INPUT' && node.collide(ev.offsetX, ev.offsetY)) {
             node.toogle_state()
-            console.log("node clicked :", node);
+            // console.log("node clicked :", node);
         }
     })
 }
@@ -116,7 +178,7 @@ const connectionRules = (node_a, node_b, container) => {
 
     const rule = rules.find(rule => rule.condition);
     if (rule) {
-        console.log(rule.log);
+        // console.log(rule.log);
         return true;
     }
     return false;
@@ -176,10 +238,8 @@ const createConnection = (ev) => {
     if (connection.sourcePin && connection.destinationPin) {
         connectNode();
         connectionList.push(connection.clone());
-        console.log(connection);
-        // Reset connection and re-evaluate the node list
+        // Reset connection 
         connection.reset()
-        console.log(connectionList);
 
         // evaluate_node_list();
     }
@@ -210,5 +270,5 @@ function calculateAngle(p0, p1, p2) {
 
 export {
     calculateGateCoordinates, validateGateSelection, calculateCompoundGateCoordinates,
-    dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor
+    dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor, evaluateChip
 }
