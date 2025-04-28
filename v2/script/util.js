@@ -167,6 +167,7 @@ const node_clicked = (ev, node_list) => {
 const connectionRules = (node_a, node_b, container) => {
     // Simplify connection rules logic
     if (!node_a && !node_b) return false;
+    if (node_a.name !== 'OUTLET' && node_b.name !== 'OUTLET' && node_a.name !== 'INLET' && node_b.name !== 'INLET' && node_a.parent === node_b.parent) return false
 
     const rules = [
         { condition: node_a.name === 'OUTLET' && node_b.name === 'IN' && !container.destinationPin, log: 0 },
@@ -208,11 +209,7 @@ const createConnection = (ev) => {
     //Ensures we are not clicking on a gate
     //Ensures we are not tying it to an existing connection
     if (!node && /*!line_selected.start_pos &&*/ !chipset.some(n => n.isColliding(ev.offsetX, ev.offsetY))) {
-        if (connection.sourcePin) {
-            connection.connectionCoord.push([ev.offsetX, ev.offsetY]);
-        } else if (connection.destinationPin) {
-            connection.connectionCoord.unshift([ev.offsetX, ev.offsetY]);
-        }
+        connection.add([mousePos.x, mousePos.y])
     }
 
     // create connection from an existing line 
@@ -240,8 +237,6 @@ const createConnection = (ev) => {
         connectionList.push(connection.clone());
         // Reset connection 
         connection.reset()
-
-        // evaluate_node_list();
     }
 };
 

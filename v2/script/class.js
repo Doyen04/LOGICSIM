@@ -21,6 +21,13 @@ class Connection extends Array {
         this.destinationPin = ''
         this.connectionCoord = []
     }
+    add(array){
+        if (this.sourcePin) {
+            this.connectionCoord.push(array)
+        }else if(this.destinationPin){
+            this.connectionCoord.unshift(array)
+        }
+    }
     getArray = () => {
         let array = []
         if (this.sourcePin != '') array.push([this.sourcePin.x, this.sourcePin.y])

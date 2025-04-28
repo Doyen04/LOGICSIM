@@ -1,5 +1,5 @@
 import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos } from "./class.js"
-import {calculateAngle} from './util.js'
+import { calculateAngle } from './util.js'
 
 let canvasElement = document.querySelector('#canvas')
 let canvasContext = canvasElement.getContext('2d')
@@ -82,12 +82,16 @@ class CANVAS {
     }
     renderLineConnection = () => {
         let tempArray = connection.getArray()
-        
+
         if (tempArray != '') {
-            tempArray.push([mousePos.x, mousePos.y])
-            this.renderLine(tempArray)    
+            if (connection.sourcePin) {
+                tempArray.push([mousePos.x, mousePos.y])
+            } else if (connection.destinationPin) {
+                tempArray.unshift([mousePos.x, mousePos.y])
+            }
+            this.renderLine(tempArray)
         }
-        connectionList.forEach(connection =>{
+        connectionList.forEach(connection => {
             this.renderLine(connection.getArray())
         })
     }
@@ -112,7 +116,7 @@ class CANVAS {
             const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
             const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
             // console.log(v1.vecLength() - radius, v2.vecLength() - radius);
-            
+
 
             const p1Start = new Vector(...p0).add(dir1); // Point to stop before corner
             const p1End = new Vector(...p2).minus(dir2); // Point to resume after corner
