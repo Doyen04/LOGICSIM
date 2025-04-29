@@ -36,18 +36,12 @@ const evaluation = (toEvaluate) => {
         node.evaluate()
     })
     toEvaluate.forEach(node => {
-        if (node.name == 'INPUT') {
-            node.outlet.connected_nodes.forEach(subnode => {
-                nextGate.push(subnode.parent)
-            })
-        } else if (node.name != 'OUTPUT'&& node.name != 'COMPOUND') {
-            console.log(node);
-            
+        if (node.name != 'OUTPUT' && node.name != 'COMPOUND') {
             node.outpin.connected_nodes.forEach(subnode => {
                 nextGate.push(subnode.parent)
             })
-        }else if(node.name == 'COMPOUND'){
-            node.outpin.forEach(node =>{
+        } else if (node.name == 'COMPOUND') {
+            node.outpin.forEach(node => {
                 node.connected_nodes.forEach(subnode => {
                     nextGate.push(subnode.parent)
                 })
@@ -147,11 +141,11 @@ function toggleInput(ev) {
 const node_clicked = (ev, node_list) => {
     for (let i = 0; i < node_list.length; i++) {
         const node = node_list[i];
-        if (node.name === 'INPUT' && node.outlet.collide(ev.offsetX, ev.offsetY)) {
-            return node.outlet;
+        if (node.name === 'INPUT' && node.outpin.collide(ev.offsetX, ev.offsetY)) {
+            return node.outpin;
         }
-        if (node.name === 'OUTPUT' && node.inlet.collide(ev.offsetX, ev.offsetY)) {
-            return node.inlet;
+        if (node.name === 'OUTPUT' && node.inpin.collide(ev.offsetX, ev.offsetY)) {
+            return node.inpin;
         }
         if (node.name === 'AND') {
             for (let j = 0; j < node.inpin.length; j++) {
@@ -191,14 +185,14 @@ const node_clicked = (ev, node_list) => {
 const connectionRules = (node_a, node_b, container) => {
     // Simplify connection rules logic
     if (!node_a && !node_b) return false;
-    if (node_a.name !== 'OUTLET' && node_b.name !== 'OUTLET' && node_a.name !== 'INLET' && node_b.name !== 'INLET' && node_a.parent === node_b.parent) return false
+    if (node_a.name == 'OUT' && node_b.name == 'OUT') return false
+    if (node_a.name == 'IN' && node_b.name == 'IN') return false
+    if (node_a.parent === node_b.parent) return false
 
     const rules = [
-        { condition: node_a.name === 'OUTLET' && node_b.name === 'IN' && !container.destinationPin, log: 0 },
         { condition: node_a.name === 'OUT' && node_b.name === 'IN' && !container.destinationPin, log: 1 },
-        { condition: node_a.name === 'OUT' && node_b.name === 'INLET' && !container.destinationPin, log: 2 },
-        { condition: (node_a.name === 'OUTLET' || node_a.name === 'OUT') && !container.sourcePin, log: 3 },
-        { condition: (node_b.name === 'INLET' || node_b.name === 'IN') && !container.destinationPin, log: 4 }
+        { condition: (node_a.name === 'OUT') && !container.sourcePin, log: 3 },
+        { condition: (node_b.name === 'IN') && !container.destinationPin, log: 4 }
     ];
 
     const rule = rules.find(rule => rule.condition);
