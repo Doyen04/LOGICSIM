@@ -8,7 +8,7 @@ class Node {
     constructor(x, y, name, fill, stroke) {
         this.id = ''
         this.name = name
-        this.custom_name = ''
+        this.customName = name
         this.x = x
         this.y = y
         this.top = 0
@@ -67,12 +67,13 @@ class Node {
     }
     draw(){
         canvas.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
-        canvas.drawText(this.x, this.y, this.w, this.h, this.name)
+        canvas.drawText(this.x, this.y, this.w, this.h, this.customName)
     }
     toJSON() {
         return {
             id: this.id,
             name: this.name,
+            customName: this.customName,
             x: this.x,
             y: this.y,
             stroke: this.stroke,
@@ -366,7 +367,8 @@ class OutputGate extends Node {
 
 class CompoundGate extends Node {
     constructor(x, y, name, fill, stroke) {
-        super(x, y, name, fill, stroke)
+        super(x, y, "COMPOUND", fill, stroke)
+        this.customName = name
         this.w = 0
         this.h = 0
         this.inpin = []
@@ -393,17 +395,18 @@ class CompoundGate extends Node {
     }
     pinPositions(){
         let [inYList, outYList] = this.calculatePinPositions(this.inpin.length, this.outpin.length, this.r)
+        
         this.inpin.forEach((pin, x) => {
             pin.x = this.x
             pin.y = inYList[x]
         });
         this.outpin.forEach((pin, x) => {
-            pin.x = this.x
+            pin.x = this.x + this.w
             pin.y = outYList[x]
         });
     }
     evaluate() {
-        let storedNode = JSON.parse(localStorage.getItem(this.name))
+        let storedNode = JSON.parse(localStorage.getItem(this.customName))
         let nodeList = Array.from(storedNode['nodes'])
         console.log(nodeList);
 
@@ -420,9 +423,12 @@ class CompoundGate extends Node {
             }
         })
     }
+    renderNode(){
+        this.draw()
+        this.inpin.forEach(pin => {pin.draw()})
+        this.outpin.forEach(pin => {pin.draw()})
+    }
     loadInputGate(object) {
-        console.log(object);
-
         let input = new InputGate(object.x, object.y, object.name, object.fill, object.stroke)
         input.overrideId(object.id)
         input.outlet.overrideId(object.outlet.id)
@@ -430,31 +436,26 @@ class CompoundGate extends Node {
         return input
     }
     loadOutputGate(object) {
-        console.log(object);
-
         let output = new OutputGate(object.x, object.y, object.name, object.fill, object.stroke)
         output.overrideId(object.id)
-        output.inlet.overrideId(object.outlet.id)
-        console.log(output);
+        output.inlet.overrideId(object.inlet.id)
         return output
     }
     loadAndGate(object) {
-        console.log(object);
-
         let and = new AndGate(object.x, object.y, object.fill, object.stroke)
         and.overrideId(object.id)
-        and.outlet.overrideId(object.outlet.id)
+        and.inpin.forEach((pin, x) =>{
+            pin.overrideId(object.inpin[x].id)
+        })
+        and.outpin.overrideId(object.outpin.id)
         console.log(and);
         return and
     }
     loadNotGate(object) {
-        console.log(object);
-
         let not = new NotGate(object.x, object.y, object.fill, object.stroke)
         not.overrideId(object.id)
-        not.inpin[0].overrideId(object.inpin[0].id)
-        not.outpin[0].overrideId(obj)
-        console.log(not);
+        not.inpin.overrideId(object.inpin.id)
+        not.outpin.overrideId(object.outpin.id)
         return not
     }
     calculateHeight(inpinLen, outpinLen) {
@@ -466,17 +467,17 @@ class CompoundGate extends Node {
         let padding = 20
         let canvasElement = document.querySelector('#canvas')
         let canvasContext = canvasElement.getContext('2d')
-        let text = canvasContext.measureText(this.name)
+        let text = canvasContext.measureText(this.customName)
         return (padding + text.width + padding)
     }
 
     calculateInpinLen() {
-        let circuitObject = JSON.parse(localStorage.getItem(this.name))
+        let circuitObject = JSON.parse(localStorage.getItem(this.customName))
         let inputArray = Array.from(circuitObject['nodes']).filter(node => node.name == 'INPUT');
         return inputArray.length
     }
     calculateOutpinLen() {
-        let circuitObject = JSON.parse(localStorage.getItem(this.name))
+        let circuitObject = JSON.parse(localStorage.getItem(this.customName))
         let outputArray = Array.from(circuitObject['nodes']).filter(node => node.name == 'OUTPUT');
         return outputArray.length
     }

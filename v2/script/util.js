@@ -40,9 +40,17 @@ const evaluation = (toEvaluate) => {
             node.outlet.connected_nodes.forEach(subnode => {
                 nextGate.push(subnode.parent)
             })
-        } else if (node.name != 'OUTPUT') {
+        } else if (node.name != 'OUTPUT'&& node.name != 'COMPOUND') {
+            console.log(node);
+            
             node.outpin.connected_nodes.forEach(subnode => {
                 nextGate.push(subnode.parent)
+            })
+        }else if(node.name == 'COMPOUND'){
+            node.outpin.forEach(node =>{
+                node.connected_nodes.forEach(subnode => {
+                    nextGate.push(subnode.parent)
+                })
             })
         }
     })
@@ -113,9 +121,8 @@ const calculateGateCoordinates = (ev) => {
 }
 
 const validateGateSelection = (ev) => {
-
     if (/*button_click &&*/ gates != '' &&
-        (gates[0].name.toLowerCase() != ev.currentTarget.getAttribute('name').toLowerCase())) {
+        (gates[0].customName.toLowerCase() != ev.currentTarget.getAttribute('name').toLowerCase())) {
         gates.reset()
     }
     // button_click = true
@@ -163,6 +170,18 @@ const node_clicked = (ev, node_list) => {
             }
             if (node.outpin.collide(ev.offsetX, ev.offsetY)) {
                 return node.outpin;
+            }
+        }
+        if (node.name == 'COMPOUND') {
+            for (let j = 0; j < node.inpin.length; j++) {
+                if (node.inpin[j].collide(ev.offsetX, ev.offsetY)) {
+                    return node.inpin[j];
+                }
+            }
+            for (let j = 0; j < node.outpin.length; j++) {
+                if (node.outpin[j].collide(ev.offsetX, ev.offsetY)) {
+                    return node.outpin[j];
+                }
             }
         }
     }
