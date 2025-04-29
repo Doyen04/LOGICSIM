@@ -65,7 +65,10 @@ class Node {
             coord.push(y)
         } return coord
     }
-
+    draw(){
+        canvas.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
+        canvas.drawText(this.x, this.y, this.w, this.h, this.name)
+    }
     toJSON() {
         return {
             id: this.id,
@@ -100,6 +103,9 @@ class ConnectionPin extends Node {
             state: 0,
             ...(isOutPin && { connected_nodes: this.connected_nodes.map(node => node.id) }), // Include connected_nodes only for outpins
         };
+    }
+    draw(){
+        canvas.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
     }
     collide(cx, cy) {
         let dx = cx - this.x
@@ -150,14 +156,9 @@ class AndGate extends Node {
 
     }
     renderNode() {
-        let new_cnvs = canvas
-        new_cnvs.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
-        new_cnvs.drawText(this.x, this.y, this.w, this.h, this.name)
-        this.inpin.forEach(pin => {
-            new_cnvs.drawCircle(pin.x, pin.y, pin.r, pin.fill, pin.stroke, 1)
-        })
-
-        new_cnvs.drawCircle(this.outpin.x, this.outpin.y, this.outpin.r, this.outpin.fill, this.outpin.stroke, 1)
+        this.draw()
+        this.inpin.forEach(pin => {pin.draw()})
+        this.outpin.draw()
     }
     toJSON() {
         return {
@@ -208,12 +209,9 @@ class NotGate extends Node {
         this.outpin.y = outYList[0]
     }
     renderNode() {
-        let new_cnvs = canvas
-        new_cnvs.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
-        new_cnvs.drawText(this.x, this.y, this.w, this.h, this.name)
-        new_cnvs.drawCircle(this.inpin.x, this.inpin.y, this.inpin.r, this.inpin.fill, this.inpin.stroke, 1)
-
-        new_cnvs.drawCircle(this.outpin.x, this.outpin.y, this.outpin.r, this.outpin.fill, this.outpin.stroke, 1)
+        this.draw()
+        this.inpin.draw()
+        this.outpin.draw()
     }
     toJSON() {
         return {
@@ -268,12 +266,9 @@ class InputGate extends Node {
     }
 
     renderNode() {
-        let new_cnvs = canvas
-        let sc = this.outlet
-        new_cnvs.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
-        new_cnvs.drawLine((this.x + (this.gap / 2)), this.y, sc.x, this.y, [], this.fill, 1)
-
-        new_cnvs.drawCircle(sc.x, sc.y, sc.r, sc.fill, sc.stroke, 1)
+        canvas.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
+        canvas.drawLine((this.x + (this.gap / 2)), this.y, this.outlet.x, this.y, [], this.fill, 1)
+        this.outlet.draw()
     }
     calculateBoundingBox() {
         this.bottom = Math.floor(this.y + this.r)
@@ -334,14 +329,10 @@ class OutputGate extends Node {
 
     }
     renderNode() {
-        let new_cnvs = canvas
-        let sc = this.inlet
-        // this.state = sc.state
         let fill = (this.state == 0) ? 'blue' : 'red';
-        new_cnvs.drawLine(this.x, this.y, sc.x, this.y, [], fill, 1)
-        new_cnvs.drawCircle(this.x, this.y, this.r, fill, this.stroke)
-
-        new_cnvs.drawCircle(sc.x, sc.y, sc.r, sc.fill, sc.stroke)
+        canvas.drawLine(this.x, this.y, this.inlet.x, this.y, [], fill, 1)
+        canvas.drawCircle(this.x, this.y, this.r, fill, this.stroke)
+        this.inlet.draw()
     }
     calculateBoundingBox() {
         this.bottom = Math.floor(this.y + this.r)
@@ -384,12 +375,32 @@ class CompoundGate extends Node {
         this.init()
     }
     init() {
-        super.init()
         const inpinLen = this.calculateInpinLen()
         const outpinLen = this.calculateOutpinLen()
         this.w = this.calculateWidth()
         this.h = this.calculateHeight(inpinLen, outpinLen)
-        super.init(inpinLen, outpinLen)
+        let r = this.r
+        for (let x = 0; x < inpinLen; x++) {
+            this.inpin.push(new ConnectionPin(this, 0, 0, r, 'IN', this.fill, this.stroke,))
+        }
+        for (let y = 0; y < outpinLen; y++) {
+            this.outpin.push(new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,))
+        }
+        
+        // this.calculateBoundingBox()
+        this.pinPositions()
+        // this.renderNode()
+    }
+    pinPositions(){
+        let [inYList, outYList] = this.calculatePinPositions(this.inpin.length, this.outpin.length, this.r)
+        this.inpin.forEach((pin, x) => {
+            pin.x = this.x
+            pin.y = inYList[x]
+        });
+        this.outpin.forEach((pin, x) => {
+            pin.x = this.x
+            pin.y = outYList[x]
+        });
     }
     evaluate() {
         let storedNode = JSON.parse(localStorage.getItem(this.name))
