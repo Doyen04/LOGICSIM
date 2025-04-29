@@ -126,7 +126,6 @@ class AndGate extends Node {
         this.h = 40
         this.inpin = []
         this.outpin = ''
-        this.is_evaluated = false
         this.init()
     }
     evaluate() {
@@ -181,7 +180,6 @@ class NotGate extends Node {
         this.h = 40
         this.inpin = ''
         this.outpin = ''
-        this.is_evaluated = false
         this.init()
     }
     evaluate() {
@@ -374,7 +372,6 @@ class CompoundGate extends Node {
         this.h = 0
         this.inpin = []
         this.outpin = []
-        this.is_evaluated = false
         this.savedNode = []
         this.init()
     }
@@ -388,13 +385,14 @@ class CompoundGate extends Node {
 
         this.savedNode.filter(node => node.customName == "INPUT").forEach(subnode => {
             let tempNode = new ConnectionPin(this, 0, 0, r, 'IN', this.fill, this.stroke,)
-            tempNode.overrideId(subnode.outpin.id)
+            tempNode.connected_nodes.push(subnode.outpin)
             this.inpin.push(tempNode)
         })
 
         this.savedNode.filter(node => node.customName == "OUTPUT").forEach(subnode => {
             let tempNode = new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,)
-            tempNode.overrideId(subnode.inpin.id)
+            let fNode = this.savedNode.find(node => node.outpin.connected_nodes.includes(subnode.inpin))
+            fNode.connected_nodes.push(tempNode)
             this.outpin.push(tempNode)
         })
 
@@ -419,16 +417,14 @@ class CompoundGate extends Node {
     evaluate() {
         // optimise
         this.inpin.forEach(pin => {
-            let inputList = this.savedNode.filter(node => node.customName == 'INPUT')
-            const foundInput = inputList.find(input => input.outpin.id === pin.id)
-            foundInput.state = pin.state
+            pin.connected_nodes.forEach(node =>{
+                node.parent.state = pin.state
+            })
         })
+        console.log(this ,this.savedNode);
+        
         evaluateChip(this.savedNode)
-        this.outpin.forEach(pin => {
-            let outputList = this.savedNode.filter(node => node.customName == 'OUTPUT')
-            const foundInput = outputList.find(output => output.inpin.id === pin.id)
-            pin.state = foundInput.state
-        })
+        console.log(this.savedNode);
         this.outpin.forEach(pin => {
             pin.connected_nodes.forEach(node => {
                 node.state = pin.state
@@ -449,6 +445,8 @@ class CompoundGate extends Node {
                 constructedNode.push(this.loadAndGate(node))
             } else if (node.name == 'OUTPUT') {
                 constructedNode.push(this.loadOutputGate(node))
+            } else if (node.name == "COMPOUND") {
+                constructedNode.push(this.loadCompoundGate(node))
             }
         })
         constructedNode.forEach(node => {
@@ -482,14 +480,25 @@ class CompoundGate extends Node {
         this.inpin.forEach(pin => { pin.draw() })
         this.outpin.forEach(pin => { pin.draw() })
     }
+    loadCompoundGate(object) {
+        let compound = new CompoundGate(object.x, object.y, object.customName, object.fill, object.stroke)
+        compound.overrideId(object.id)
+        compound.inpin.forEach((pin, x) => {
+            pin.overrideId(object.inpin[x].id)
+        })
+        compound.outpin.forEach((pin, x) => {
+            pin.overrideId(object.outpin[x].id)
+        })
+        return compound
+    }
     loadInputGate(object) {
-        let input = new InputGate(object.x, object.y, object.name, object.fill, object.stroke)
+        let input = new InputGate(object.x, object.y, object.customName, object.fill, object.stroke)
         input.overrideId(object.id)
         input.outpin.overrideId(object.outpin.id)
         return input
     }
     loadOutputGate(object) {
-        let output = new OutputGate(object.x, object.y, object.name, object.fill, object.stroke)
+        let output = new OutputGate(object.x, object.y, object.customName, object.fill, object.stroke)
         output.overrideId(object.id)
         output.inpin.overrideId(object.inpin.id)
         return output
@@ -532,6 +541,16 @@ class CompoundGate extends Node {
         let circuitObject = JSON.parse(localStorage.getItem(this.customName))
         let outputArray = Array.from(circuitObject['nodes']).filter(node => node.name == 'OUTPUT');
         return outputArray.length
+    }
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            w: this.w,
+            h: this.h,
+            inpin: this.inpin.map(pin => pin.toJSON()), // Serialize pins
+            outpin: this.outpin.map(pin => pin.toJSON()), //
+            savedNode: this.savedNode.map(node => node.toJSON())
+        }
     }
 
 }

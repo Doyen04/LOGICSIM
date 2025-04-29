@@ -38,12 +38,12 @@ const evaluation = (toEvaluate) => {
     toEvaluate.forEach(node => {
         if (node.name != 'OUTPUT' && node.name != 'COMPOUND') {
             node.outpin.connected_nodes.forEach(subnode => {
-                nextGate.push(subnode.parent)
+                if (!nextGate.includes(subnode.parent)) nextGate.push(subnode.parent)
             })
         } else if (node.name == 'COMPOUND') {
             node.outpin.forEach(node => {
                 node.connected_nodes.forEach(subnode => {
-                    nextGate.push(subnode.parent)
+                    if (!nextGate.includes(subnode.parent)) nextGate.push(subnode.parent)
                 })
             })
         }
