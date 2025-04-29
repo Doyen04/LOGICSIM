@@ -148,16 +148,23 @@ const node_clicked = (ev, node_list) => {
         if (node.name === 'OUTPUT' && node.inlet.collide(ev.offsetX, ev.offsetY)) {
             return node.inlet;
         }
-        if (node.name !== 'INPUT' && node.name !== 'OUTPUT') {
+        if (node.name === 'AND') {
             for (let j = 0; j < node.inpin.length; j++) {
                 if (node.inpin[j].collide(ev.offsetX, ev.offsetY)) {
                     return node.inpin[j];
                 }
             }
-            for (let k = 0; k < node.outpin.length; k++) {
-                if (node.outpin[k].collide(ev.offsetX, ev.offsetY)) {
-                    return node.outpin[k];
-                }
+            if (node.outpin.collide(ev.offsetX, ev.offsetY)) {
+                return node.outpin;
+            }
+
+        }
+        if (node.name === 'NOT') {
+            if (node.inpin.collide(ev.offsetX, ev.offsetY)) {
+                return node.inpin;
+            }
+            if (node.outpin.collide(ev.offsetX, ev.offsetY)) {
+                return node.outpin;
             }
         }
     }

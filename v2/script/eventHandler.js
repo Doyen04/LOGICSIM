@@ -184,7 +184,7 @@ const loadCircuit = (ev) => {
 
 
 const deleteCircuit = (ev) => {
-    //ev.stopPropagation()
+    ev.stopPropagation()
     const key = ev.currentTarget.dataset.key;
     //add error handling
     if (confirm(`Are you sure you want to delete the circuit "${key}"?`)) {
