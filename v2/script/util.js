@@ -41,10 +41,8 @@ const evaluation = (toEvaluate) => {
                 nextGate.push(subnode.parent)
             })
         } else if (node.name != 'OUTPUT') {
-            node.outpin.forEach(outpin => {
-                outpin.connected_nodes.forEach(subnode => {
-                    nextGate.push(subnode.parent)
-                })
+            node.outpin.connected_nodes.forEach(subnode => {
+                nextGate.push(subnode.parent)
             })
         }
     })

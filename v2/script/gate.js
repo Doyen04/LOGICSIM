@@ -140,7 +140,7 @@ class AndGate extends Node {
         }
         this.outpin = new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,)
 
-        // this.calculateBoundingBox()
+        this.calculateBoundingBox()
         this.pinPositions()
         // this.renderNode()
     }
@@ -194,7 +194,7 @@ class NotGate extends Node {
         this.inpin = new ConnectionPin(this, 0, 0, r, 'IN', this.fill, this.stroke,)
         this.outpin = new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,)
 
-        // this.calculateBoundingBox()
+        this.calculateBoundingBox()
         this.pinPositions()
         // this.renderNode()
 
@@ -255,7 +255,7 @@ class InputGate extends Node {
     init() {
         this.outlet = new ConnectionPin(this, 0, 0, 6, 'OUTLET', this.fill, this.stroke)
         this.outlet_pos()
-        // this.calculateBoundingBox()
+        this.calculateBoundingBox()
         // this.renderNode()
     }
     outlet_pos() {
@@ -313,7 +313,7 @@ class OutputGate extends Node {
     init() {
         this.inlet = new ConnectionPin(this, 0, 0, 6, 'INLET', this.fill, this.stroke)
         this.inlet_pos()
-        // this.calculateBoundingBox()
+        this.calculateBoundingBox()
         // this.renderNode()
     }
     inlet_pos() {
@@ -387,7 +387,7 @@ class CompoundGate extends Node {
             this.outpin.push(new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,))
         }
         
-        // this.calculateBoundingBox()
+        this.calculateBoundingBox()
         this.pinPositions()
         // this.renderNode()
     }
