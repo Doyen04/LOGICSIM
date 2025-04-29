@@ -98,7 +98,7 @@ class CANVAS {
     renderLine = (points) => {
         const radius = 5;
 
-        canvasContext.strokeStyle = 'black';
+        canvasContext.strokeStyle = (points[0].length == 3 && points[0][2] == 1)?'red': 'black';
         canvasContext.lineWidth = 5;
         canvasContext.lineJoin = 'round';
 

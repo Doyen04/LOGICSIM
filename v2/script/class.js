@@ -30,7 +30,7 @@ class Connection extends Array {
     }
     getArray = () => {
         let array = []
-        if (this.sourcePin != '') array.push([this.sourcePin.x, this.sourcePin.y])
+        if (this.sourcePin != '') array.push([this.sourcePin.x, this.sourcePin.y, this.sourcePin.state])
         if (this.connectionCoord != '') array.push(...this.connectionCoord)
         if (this.destinationPin != '') array.push([this.destinationPin.x, this.destinationPin.y])
 
