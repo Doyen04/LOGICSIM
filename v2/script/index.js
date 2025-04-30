@@ -1,7 +1,7 @@
 import { canvas } from './canvas.js'
 import {
     onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, saveToLocalStorage,closeLibrary,
-    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,displayLibrary,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,displayLibrary,onContextMenuClick,
     addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, onCanvasMouseLeave
 } from './eventHandler.js'
 
@@ -21,6 +21,8 @@ saveAs.addEventListener('click', saveToLocalStorage)
 const cancel = document.querySelector('.cancel')
 cancel.addEventListener('click', closeLibrary)
 
+const contextMenu = document.querySelector('.context-menu')
+contextMenu.addEventListener('click', onContextMenuClick)
 
 const library = document.querySelector('.library')
 library.addEventListener('click', displayLibrary)

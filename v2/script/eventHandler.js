@@ -43,7 +43,8 @@ const onCanvasMouseMove = (ev) => {
 
 }
 
-const onCanvasMouseClick = (ev) => {console.log(ev.type);
+const onCanvasMouseClick = (ev) => {
+    console.log(ev.type);
 
     if (isAddGateButtonClick) {
         chipset.push(...gates)
@@ -61,7 +62,8 @@ const onCanvasMouseClick = (ev) => {console.log(ev.type);
 
 }
 
-const onCanvasMouseDown = (ev) => {console.log(ev.type);
+const onCanvasMouseDown = (ev) => {
+    console.log(ev.type);
     if (isAddGateButtonClick == false && ev.button == 0) {
         // console.log(ev.type);
         isMouseDown = true
@@ -71,14 +73,30 @@ const onCanvasMouseDown = (ev) => {console.log(ev.type);
     }
 }
 
-const onCanvasMouseUp = (ev) => {console.log(ev.type);
+const onCanvasMouseUp = (ev) => {
+    console.log(ev.type);
     isMouseDown = false
 }
 const onCanvasRightClick = (ev) => {
     ev.preventDefault()
     if (connection.destinationPin == '' || connection.sourcePin == '') {
         connection.reset()
+    } if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
+        let gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y))
+        if(gate)displayContextMenu(ev, gate)
     }
+
+}
+const displayContextMenu = (ev, node) => {
+    const contextMenu = document.querySelector('.context-menu')
+    const contextMenuHeader = document.querySelector('.context-menu-header')
+    contextMenuHeader.innerHTML = `${node.customName}`
+    contextMenu.style.display = 'flex'
+    contextMenu.style.top = `${ev.clientY}px`
+    contextMenu.style.left = `${ev.clientX}px`
+}
+
+const onContextMenuClick = (ev) => {
 
 }
 
@@ -199,7 +217,7 @@ const closeLibrary = () => {
     modal.classList.toggle('toggle-sidebar');
 }
 export {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave, displayLibrary,
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave, displayLibrary, onContextMenuClick,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler, saveToLocalStorage,
     addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, closeLibrary
 }
