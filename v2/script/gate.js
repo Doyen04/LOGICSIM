@@ -420,24 +420,26 @@ class CompoundGate extends Node {
                 node.parent.state = pin.state
             })
         })
-        console.log(this, this.savedNode);
-        // this.outpin.forEach(pin => {
-        //     let filteredNode = this.savedNode.filter(node => node.name != "OUTPUT")
-        //     let foundNode = filteredNode.find(node => node.outpin.connected_nodes.includes(pin.id))
-        //     foundNode.connected_nodes.push(...this.outpin)
-        // })
+
         evaluateChip(this.savedNode)
-        console.log(this.savedNode);
+
+        const outputNodes = this.savedNode.filter(node => node.name === "OUTPUT");
+        // Map the output nodes by their IDs for faster lookup
+        const outputNodeMap = new Map(outputNodes.map(node => [node.id, node]));
+
         this.outpin.forEach(pin => {
-            let filteredNode = this.savedNode.filter(node => node.name == "OUTPUT")
-            let outputNode = filteredNode.find(node => node.id == pin.id)
-            pin.state = outputNode.state
-        })
+            const outputNode = outputNodeMap.get(pin.id);
+            if (outputNode) {
+                pin.state = outputNode.state;
+            }
+        });
+
+        // Update the state of connected nodes
         this.outpin.forEach(pin => {
             pin.connected_nodes.forEach(node => {
-                node.state = pin.state
-            })
-        })
+                node.state = pin.state;
+            });
+        });
     }
     constructGate() {
         let storedNode = JSON.parse(localStorage.getItem(this.customName))
