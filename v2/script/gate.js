@@ -95,7 +95,7 @@ class ConnectionPin extends Node {
     toJSON() {
         //would have problem with compund
         // Check if this pin is an outpin
-        const isOutPin = (this.parent.outpin == this)
+        // const isOutPin = (this.parent.outpin == this)
         return {
             id: this.id,
             name: this.name,
@@ -103,7 +103,7 @@ class ConnectionPin extends Node {
             y: this.y,
             r: this.r,
             state: 0,
-            ...(isOutPin && { connected_nodes: this.connected_nodes.map(node => node.id) }), // Include connected_nodes only for outpins
+            connected_nodes: this.connected_nodes.map(node => node.id), // Include connected_nodes only for outpins
         };
     }
     draw() {
@@ -391,8 +391,7 @@ class CompoundGate extends Node {
 
         this.savedNode.filter(node => node.customName == "OUTPUT").forEach(subnode => {
             let tempNode = new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,)
-            let fNode = this.savedNode.find(node => node.outpin.connected_nodes.includes(subnode.inpin))
-            fNode.connected_nodes.push(tempNode)
+            tempNode.overrideId(subnode.id)
             this.outpin.push(tempNode)
         })
 
@@ -417,14 +416,23 @@ class CompoundGate extends Node {
     evaluate() {
         // optimise
         this.inpin.forEach(pin => {
-            pin.connected_nodes.forEach(node =>{
+            pin.connected_nodes.forEach(node => {
                 node.parent.state = pin.state
             })
         })
-        console.log(this ,this.savedNode);
-        
+        console.log(this, this.savedNode);
+        // this.outpin.forEach(pin => {
+        //     let filteredNode = this.savedNode.filter(node => node.name != "OUTPUT")
+        //     let foundNode = filteredNode.find(node => node.outpin.connected_nodes.includes(pin.id))
+        //     foundNode.connected_nodes.push(...this.outpin)
+        // })
         evaluateChip(this.savedNode)
         console.log(this.savedNode);
+        this.outpin.forEach(pin => {
+            let filteredNode = this.savedNode.filter(node => node.name == "OUTPUT")
+            let outputNode = filteredNode.find(node => node.id == pin.id)
+            pin.state = outputNode.state
+        })
         this.outpin.forEach(pin => {
             pin.connected_nodes.forEach(node => {
                 node.state = pin.state
@@ -450,10 +458,19 @@ class CompoundGate extends Node {
             }
         })
         constructedNode.forEach(node => {
-            if (node.name != 'OUTPUT') {
+            if (node.name != 'OUTPUT' && node.name != 'COMPOUND') {
+
                 const foundNode = nodeList.find(obj => obj.id === node.id);
                 let connectedNodes = this.getConnectedNode(constructedNode, foundNode.outpin.connected_nodes)
                 node.outpin.connected_nodes = [...connectedNodes]
+            } else if (node.name == 'COMPOUND') {
+                const foundNode = nodeList.find(obj => obj.id === node.id);
+
+                node.outpin.forEach(subnode => {
+                    let foundPin = foundNode.outpin.find(pin => pin.id == subnode.id)
+                    let connectedNodes = this.getConnectedNode(constructedNode, foundPin.connected_nodes)
+                    subnode.connected_nodes = [...connectedNodes]
+                })
             }
         })
 
@@ -465,7 +482,7 @@ class CompoundGate extends Node {
         const idSet = new Set(idList);
 
         nodeList.forEach(node => {
-            if (node.name === 'AND') {
+            if (node.name === 'AND' || node.name == 'COMPOUND') {
                 // Filter and push matching pins for AND gates
                 nodes.push(...node.inpin.filter(pin => idSet.has(pin.id)));
             } else if (node.name !== 'INPUT' && idSet.has(node.inpin.id)) {
