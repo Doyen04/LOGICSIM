@@ -31,13 +31,11 @@ const onCanvasMouseMove = (ev) => {
 
     let newx = ev.offsetX - mousePos.x
     let newy = ev.offsetY - mousePos.y
-    if (gates != '') {
+    if (gates != '' && (isAddGateButtonClick || isMouseDrag)) {
         dragLogic(newx, newy)
     }
+    if (isMouseDown && ev.movementX != 0 && ev.movementY != 0) isMouseDrag = true;
 
-    if (isMouseDown && ev.movementX != 0 && ev.movementY != 0) {
-        isMouseDrag = true
-    }
     // if (temp_canvas_class == null) temp_canvas_class = new CANVAS
     // line_selected = temp_canvas_class.get_line_collision()
     mousePos.x = ev.offsetX
@@ -45,41 +43,43 @@ const onCanvasMouseMove = (ev) => {
 
 }
 
-const onCanvasMouseClick = (ev) => {
+const onCanvasMouseClick = (ev) => {console.log(ev.type);
 
-    // console.log(isMouseDown, isMouseDrag, gates);
-    // console.log(ev.type);
-    if (/*isMouseDown ||*/ isAddGateButtonClick) {
+    if (isAddGateButtonClick) {
         chipset.push(...gates)
-        // gates.reset()
+        gates.reset()
     }
-    gates.reset()
+    if (isMouseDown || isMouseDrag) gates.reset()
 
     if (isMouseDrag == false && isAddGateButtonClick == false) {
         toggleInput(ev)
         createConnection(ev)
     }
-    // document.getElementsByClassName('pop-up')[0].style.display = 'none'
 
     isAddGateButtonClick = false
     isMouseDrag = false
-    // console.log(gates, chipset);
 
 }
 
-const onCanvasMouseDown = (ev) => {
-
+const onCanvasMouseDown = (ev) => {console.log(ev.type);
+    if (isAddGateButtonClick == false && ev.button == 0) {
+        // console.log(ev.type);
+        isMouseDown = true
+        chipset.forEach(gate => {
+            if (gate.collide(mousePos.x, mousePos.y)) gates.push(gate)
+        })
+    }
 }
 
-const onCanvasMouseUp = (ev) => {
-
+const onCanvasMouseUp = (ev) => {console.log(ev.type);
+    isMouseDown = false
 }
 const onCanvasRightClick = (ev) => {
     ev.preventDefault()
-    if(connection.destinationPin == '' || connection.sourcePin == ''){
+    if (connection.destinationPin == '' || connection.sourcePin == '') {
         connection.reset()
     }
-    
+
 }
 
 const addAndGateHandler = (ev) => {
@@ -175,9 +175,9 @@ const loadCircuit = (ev) => {
     const circuitObject = JSON.parse(localStorage.getItem(key))
     validateGateSelection(ev)
     // console.log(circuitObject['fill'], circuitObject['stroke']);
-    
+
     let [x, y] = calculateCompoundGateCoordinates(ev)
-    gates.push(new CompoundGate(x - 50, y, key,circuitObject['fill'], circuitObject['stroke']))
+    gates.push(new CompoundGate(x - 50, y, key, circuitObject['fill'], circuitObject['stroke']))
     // console.log(gates[0]);
     isAddGateButtonClick = true
 }

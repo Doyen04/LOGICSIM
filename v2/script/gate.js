@@ -30,7 +30,7 @@ class Node {
         }
         this.id = result
     }
-    isColliding(cx, cy) {
+    collide(cx, cy) {
         if (cx > this.x && cy > this.y &&
             cx < (this.right) && cy < (this.bottom)) {
             return true
