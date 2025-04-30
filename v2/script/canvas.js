@@ -81,6 +81,10 @@ class CANVAS {
         }
     }
     renderLineConnection = () => {
+        connectionList.forEach(connection => {
+            this.renderLine(connection.getArray())
+        })
+
         let tempArray = connection.getArray()
 
         if (tempArray != '') {
@@ -91,9 +95,6 @@ class CANVAS {
             }
             this.renderLine(tempArray)
         }
-        connectionList.forEach(connection => {
-            this.renderLine(connection.getArray())
-        })
     }
     renderLine = (points) => {
         const radius = 5;
@@ -138,10 +139,10 @@ class CANVAS {
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height)
 
         this.renderLineConnection()
-        gates.forEach(gate => {
+        chipset.forEach(gate => {
             gate.renderNode()
         })
-        chipset.forEach(gate => {
+        gates.forEach(gate => {
             gate.renderNode()
         })
         requestAnimationFrame(this.renderCanvas)
