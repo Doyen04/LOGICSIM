@@ -67,8 +67,16 @@ const getEvaluated = (evaluated, evaluationList) => {
 const deleteGate = (gate) => {
     const index = chipset.findIndex(chip => chip.id == gate.id)
     if (index > -1) {
-        let fConection = connectionList.filter(connection => connection.sourcePin.parent.id == gate.id)
+        let fConnection = connectionList.filter(connection => connection.sourcePin.parent.id == gate.id)
         let lConnection = connectionList.filter(connection => connection.destinationPin.parent.id == gate.id)
+        lConnection.forEach(connect =>{
+            let filterPin = connect.sourcePin.connected_nodes.filter(node => node.parent.id != gate.id)
+            connect.sourcePin.connected_nodes = filterPin
+        })
+        // remove fConnection and lConnection from connectionList
+        let filterConnection = connectionList.filter(connection => !fConnection.includes(connection) && !lConnection.includes(connection))
+        connectionList.reset()
+        connectionList.push(...filterConnection)
         chipset.splice(index, 1)
     }
 }
