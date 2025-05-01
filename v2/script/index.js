@@ -6,15 +6,6 @@ import {
 } from './eventHandler.js'
 
 
-
-// function windowLoadHandler() {
-// console.log(888);
-// function menuClickHandler(ev) {
-//     console.log(88888);
-// }
-// }
-// window.addEventListener('DOMContentLoaded', windowLoadHandler)
-
 const saveAs = document.querySelector('.saveas')
 saveAs.addEventListener('click', saveToLocalStorage)
 

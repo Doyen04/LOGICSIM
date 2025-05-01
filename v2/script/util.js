@@ -64,6 +64,29 @@ const getEvaluated = (evaluated, evaluationList) => {
     return evaluatedChip;
 }
 
+const deleteGate = (gate) => {
+    const index = chipset.findIndex(chip => chip.id == gate.id)
+    if (index > -1) {
+        let fConection = connectionList.filter(connection => connection.sourcePin.parent.id == gate.id)
+        let lConnection = connectionList.filter(connection => connection.destinationPin.parent.id == gate.id)
+        chipset.splice(index, 1)
+    }
+}
+const displayContextMenu = (ev, node) => {
+    const contextMenu = document.querySelector('.context-menu')
+    const contextMenuHeader = document.querySelector('.context-menu-header')
+    contextMenuHeader.innerHTML = `${node.customName}`
+    contextMenu.style.display = 'flex'
+    contextMenu.style.top = `${ev.clientY}px`
+    contextMenu.style.left = `${ev.clientX}px`
+    contextMenu.setAttribute('nodeX', ev.offsetX)
+    contextMenu.setAttribute('nodeY', ev.offsetY)
+}
+const hideContextMenu = () => {
+    const contextMenu = document.querySelector('.context-menu')
+    contextMenu.style.display = 'none'
+}
+
 const generateRandomColor = () => {
     let result = '#'
     let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
@@ -226,7 +249,7 @@ const createConnection = (ev) => {
     // Handle adding connector points when no node is clicked
     //Ensures we are not clicking on a gate
     //Ensures we are not tying it to an existing connection
-    if (!node && /*!line_selected.start_pos &&*/ !chipset.some(n => n.isColliding(ev.offsetX, ev.offsetY))) {
+    if (!node && /*!line_selected.start_pos &&*/ !chipset.some(n => n.collide(ev.offsetX, ev.offsetY))) {
         connection.add([mousePos.x, mousePos.y])
     }
 
@@ -282,6 +305,8 @@ function calculateAngle(p0, p1, p2) {
 
 
 export {
-    calculateGateCoordinates, validateGateSelection, calculateCompoundGateCoordinates,
-    dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor, evaluateChip
+    hideContextMenu, displayContextMenu, calculateGateCoordinates, validateGateSelection,
+    calculateCompoundGateCoordinates, deleteGate,
+    dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor,
+    evaluateChip
 }

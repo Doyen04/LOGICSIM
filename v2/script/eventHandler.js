@@ -2,21 +2,22 @@ import { AndGate, NotGate, InputGate, OutputGate, CompoundGate } from './gate.js
 import {
     calculateGateCoordinates, validateGateSelection,
     dragLogic, toggleInput, createConnection, calculateCompoundGateCoordinates,
-    generateRandomColor
+    generateRandomColor,
+    deleteGate,
+    displayContextMenu,
+    hideContextMenu
 } from './util.js'
 import { gates, chipset, mousePos, connectionList, connection } from './class.js'
 
 
-// let mousePos = { x: 0, y: 0 }
+
 let isMouseDown = false
 let isMouseDrag = false
 let isAddGateButtonClick = false
 
 const onCanvasMouseEnter = (ev) => {
-    // mousePos.x = ev.offsetX
-    // mousePos.y = ev.offsetY
 }
-//allow moving wwhen the mouse is out of the screen pls
+
 const onCanvasMouseLeave = (ev) => {
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
@@ -27,8 +28,7 @@ const onCanvasMouseLeave = (ev) => {
     isMouseDrag = false
 }
 
-const onCanvasMouseMove = (ev) => {
-
+const onCanvasMouseMove = (ev) => {//console.log(chipset, ev)
     let newx = ev.offsetX - mousePos.x
     let newy = ev.offsetY - mousePos.y
     if (gates != '' && (isAddGateButtonClick || isMouseDrag)) {
@@ -40,17 +40,17 @@ const onCanvasMouseMove = (ev) => {
     // line_selected = temp_canvas_class.get_line_collision()
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
-
+    //console.log(chipset);
 }
 
 const onCanvasMouseClick = (ev) => {
+
     console.log(ev.type);
 
     if (isAddGateButtonClick) {
         chipset.push(...gates)
-        gates.reset()
     }
-    if (isMouseDown || isMouseDrag) gates.reset()
+    gates.reset()
 
     if (isMouseDrag == false && isAddGateButtonClick == false) {
         toggleInput(ev)
@@ -59,13 +59,11 @@ const onCanvasMouseClick = (ev) => {
 
     isAddGateButtonClick = false
     isMouseDrag = false
-
 }
 
 const onCanvasMouseDown = (ev) => {
     console.log(ev.type);
     if (isAddGateButtonClick == false && ev.button == 0) {
-        // console.log(ev.type);
         isMouseDown = true
         chipset.forEach(gate => {
             if (gate.collide(mousePos.x, mousePos.y)) gates.push(gate)
@@ -78,26 +76,27 @@ const onCanvasMouseUp = (ev) => {
     isMouseDown = false
 }
 const onCanvasRightClick = (ev) => {
+    console.log(ev.type);
+
     ev.preventDefault()
     if (connection.destinationPin == '' || connection.sourcePin == '') {
         connection.reset()
     } if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
         let gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y))
-        if(gate)displayContextMenu(ev, gate)
+        if (gate) displayContextMenu(ev, gate)
     }
-
-}
-const displayContextMenu = (ev, node) => {
-    const contextMenu = document.querySelector('.context-menu')
-    const contextMenuHeader = document.querySelector('.context-menu-header')
-    contextMenuHeader.innerHTML = `${node.customName}`
-    contextMenu.style.display = 'flex'
-    contextMenu.style.top = `${ev.clientY}px`
-    contextMenu.style.left = `${ev.clientX}px`
 }
 
 const onContextMenuClick = (ev) => {
-
+    let x = parseInt(ev.currentTarget.getAttribute('nodeX'))
+    let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
+    let gate = chipset.find(chip => chip.collide(x, y))
+    if (ev.target.innerHTML.toLowerCase() == 'delete') {
+        if (gate) deleteGate(gate)
+        hideContextMenu()
+    } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
+        console.log(ev.target);
+    }
 }
 
 const addAndGateHandler = (ev) => {
