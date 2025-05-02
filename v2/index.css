@@ -49,12 +49,17 @@ header {
     position: relative;
     align-items: center;
     justify-content: space-between;
-    padding: 20px;
+    padding: 10px;
     color: white;
     font-family: sans-serif;
     font-weight: bold;
 }
-
+.logo-container{
+    height: 100%;
+    width: 120px;
+    display: flex;
+    gap: 9px;
+}
 .menu-items {
     width: 100%;
     display: none;
