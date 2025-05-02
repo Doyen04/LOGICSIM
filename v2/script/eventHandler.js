@@ -98,7 +98,10 @@ const onContextMenuClick = (ev) => {
     let connect = canvas.getLineCollision()
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
-        if(connect) deleteLine(connect)
+        if (connect) {
+            document.querySelector('.inspect').style.display = 'none'
+            deleteLine(connect)
+        }
         hideContextMenu()
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
         console.log(ev.target);
