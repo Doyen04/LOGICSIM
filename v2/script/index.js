@@ -1,4 +1,5 @@
 import { canvas } from './canvas.js'
+import { chipset } from './class.js'
 import {
     onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, saveToLocalStorage,toggleLibrary,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,displayLibrary,onContextMenuClick,
@@ -11,6 +12,9 @@ saveAs.addEventListener('click', saveToLocalStorage)
 
 const cancel = document.querySelector('.cancel')
 cancel.addEventListener('click', toggleLibrary)
+
+const newfile = document.querySelector('.newfile')
+newfile.addEventListener('click', ()=>{chipset.reset()})
 
 const contextMenu = document.querySelector('.context-menu')
 contextMenu.addEventListener('click', onContextMenuClick)
