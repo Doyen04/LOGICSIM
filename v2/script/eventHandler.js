@@ -85,9 +85,15 @@ const onCanvasRightClick = (ev) => {
         connection.reset()
     } if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
         let gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y))
-        if (gate) displayContextMenu(ev, gate)
+        if (gate){
+            document.querySelector('.inspect').style.display = 'block'
+             displayContextMenu(ev, gate)
+        }
         let connect = canvas.getLineCollision()
-        if (connect.length > 0) displayContextMenu(ev, connection)
+        if (connect.length > 0){
+            document.querySelector('.inspect').style.display = 'none'
+            displayContextMenu(ev, connection)
+        }
     }
 }
 
@@ -98,10 +104,7 @@ const onContextMenuClick = (ev) => {
     let connect = canvas.getLineCollision()
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
-        if (connect) {
-            document.querySelector('.inspect').style.display = 'none'
-            deleteLine(connect)
-        }
+        if (connect) deleteLine(connect)
         hideContextMenu()
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
         console.log(ev.target);

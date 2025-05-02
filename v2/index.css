@@ -223,7 +223,7 @@ header {
 }
 .context-menu{
     width: 150px;
-    height: 110px;
+    height: fit-content;
     position: absolute;
     background-color: rgb(27, 27, 44);
     display: none;
