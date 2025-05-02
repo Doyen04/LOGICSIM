@@ -7,10 +7,10 @@ const evaluateChip = (chip) => {
     let evaluatedChips = []
 
     while (evaluationList.length > 0) {
-        let evaluated = getEvaluated(evaluatedChips, evaluationList)
 
+        let evaluated = getEvaluated(evaluatedChips, evaluationList)
         if (evaluated.length > 0) {
-            reEvaluation(evaluated)
+            reEvaluation(evaluated, evaluatedChips)
         }
         //filter out non evaluated
         let nonEvaluated = getNonEvaluated(evaluatedChips, evaluationList)
@@ -20,14 +20,14 @@ const evaluateChip = (chip) => {
     }
 
 }
-const reEvaluation = (evaluated) => {
+const reEvaluation = (evaluated, evaluatedChips) => {
     let evaluationList = evaluation(evaluated)
-    let touched = getEvaluated(evaluated, evaluationList)
+    let touched = getEvaluated(evaluationList, evaluatedChips)
 
-    while (touched.length == 0) {
-        let resultList = evaluation(evaluationList)
-        evaluationList = resultList
-        touched = getEvaluated(evaluated, evaluationList)
+    while (touched.length != 0
+        && touched.filter(node => evaluated.includes(node)).length == 0) {
+        evaluationList = evaluation(evaluationList)
+        touched = getEvaluated(evaluationList, evaluatedChips)
     }
 }
 const evaluation = (toEvaluate) => {
@@ -69,7 +69,7 @@ const deleteGate = (gate) => {
     if (index > -1) {
         let fConnection = connectionList.filter(connection => connection.sourcePin.parent.id == gate.id)
         let lConnection = connectionList.filter(connection => connection.destinationPin.parent.id == gate.id)
-        lConnection.forEach(connect =>{
+        lConnection.forEach(connect => {
             let filterPin = connect.sourcePin.connected_nodes.filter(node => node.parent.id != gate.id)
             connect.sourcePin.connected_nodes = filterPin
         })
@@ -78,6 +78,7 @@ const deleteGate = (gate) => {
         connectionList.reset()
         connectionList.push(...filterConnection)
         chipset.splice(index, 1)
+        chipset.resetGateState()
     }
 }
 const displayContextMenu = (ev, node) => {

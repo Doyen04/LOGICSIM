@@ -236,14 +236,9 @@ class InputGate extends Node {
     }
     toogle_state() {
         this.state = (this.state == 0) ? 1 : 0;
-        // console.log(this.state);
-        this.fill = (this.state == 0) ? 'blue' : 'red';
         this.outpin.state = this.state
 
-        //need to evaluate to calculate circuilt twice
         evaluateChip(chipset)
-        // evaluate_node_list()
-
     }
     evaluate() {
         this.outpin.state = this.state
@@ -266,6 +261,7 @@ class InputGate extends Node {
     }
 
     renderNode() {
+        this.fill = (this.state == 0) ? 'blue' : 'red';
         canvas.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
         canvas.drawLine((this.x + (this.gap / 2)), this.y, this.outpin.x, this.y, [], this.fill, 1)
         this.outpin.draw()

@@ -4,6 +4,21 @@ class CustomArray extends Array {
         this.length = 0
     }
 }
+class ChipSet extends CustomArray {
+    resetGateState() {
+        this.forEach(node => {
+            if (node.name == 'INPUT' || node.name == 'OUTPUT') {
+                console.log(node.name);
+                (node.name == 'INPUT') ? node.outpin.state = 0 : node.inpin.state = 0;
+                node.state = 0
+            } else if (node.name == 'AND' || node.name == 'COMPOUND') {
+                node.inpin.forEach(pin => { pin.state = 0 })
+            } else if (node.name == 'NOT') {
+                node.inpin.state = 0
+            }
+        })
+    }
+}
 class Connection extends Array {
     sourcePin = ''
     destinationPin = ''
@@ -21,10 +36,10 @@ class Connection extends Array {
         this.destinationPin = ''
         this.connectionCoord = []
     }
-    add(array){
+    add(array) {
         if (this.sourcePin) {
             this.connectionCoord.push(array)
-        }else if(this.destinationPin){
+        } else if (this.destinationPin) {
             this.connectionCoord.unshift(array)
         }
     }
@@ -80,6 +95,6 @@ const connection = new Connection()
 const connectionList = new CustomArray()
 
 const gates = new CustomArray()
-const chipset = new CustomArray()
+const chipset = new ChipSet()
 
 export { gates, chipset, connection, connectionList, Vector2, Vector, mousePos }
