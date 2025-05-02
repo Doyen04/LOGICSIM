@@ -6,7 +6,8 @@ import {
     deleteGate,
     displayContextMenu,
     hideContextMenu,
-    deleteLine
+    deleteLine,
+    inspectGate
 } from './util.js'
 import { gates, chipset, mousePos, connectionList, connection } from './class.js'
 import { canvas } from './canvas.js'
@@ -61,6 +62,11 @@ const onCanvasMouseClick = (ev) => {
 
     isAddGateButtonClick = false
     isMouseDrag = false
+    hideContextMenu()
+    if (document.querySelector('.floating-sidebar')
+        .classList.contains('toggle-sidebar')) {
+        toggleLibrary()
+    }
 }
 
 const onCanvasMouseDown = (ev) => {
@@ -85,12 +91,12 @@ const onCanvasRightClick = (ev) => {
         connection.reset()
     } if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
         let gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y))
-        if (gate){
+        if (gate) {
             document.querySelector('.inspect').style.display = 'block'
-             displayContextMenu(ev, gate)
+            displayContextMenu(ev, gate)
         }
         let connect = canvas.getLineCollision()
-        if (connect.length > 0){
+        if (connect.length > 0) {
             document.querySelector('.inspect').style.display = 'none'
             displayContextMenu(ev, connection)
         }
@@ -102,12 +108,14 @@ const onContextMenuClick = (ev) => {
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
     let gate = chipset.find(chip => chip.collide(x, y))
     let connect = canvas.getLineCollision()
+    
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
         if (connect) deleteLine(connect)
         hideContextMenu()
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
         console.log(ev.target);
+        inspectGate(ev, gate)
     }
 }
 
@@ -169,8 +177,7 @@ const saveToLocalStorage = () => {
 
 const displayLibrary = () => {
     toggleMenuHandler()
-    let modal = document.querySelector('.floating-sidebar');
-    modal.classList.toggle('toggle-sidebar');
+    toggleLibrary()
 
     let container = document.querySelector('.library-container');
     container.innerHTML = ''; // Clear previous content
@@ -223,12 +230,12 @@ const deleteCircuit = (ev) => {
     }
 }
 
-const closeLibrary = () => {
+const toggleLibrary = () => {
     let modal = document.querySelector('.floating-sidebar');
     modal.classList.toggle('toggle-sidebar');
 }
 export {
     onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave, displayLibrary, onContextMenuClick,
     onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler, saveToLocalStorage,
-    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, closeLibrary
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, toggleLibrary
 }

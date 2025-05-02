@@ -120,6 +120,16 @@ const hideContextMenu = () => {
     const contextMenu = document.querySelector('.context-menu')
     contextMenu.style.display = 'none'
 }
+const inspectGate =(ev, gate)=>{
+    let x  = parseInt(ev.currentTarget.getAttribute('nodeX'))
+    let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
+    if (gate.name == "COMPOUND") {
+        console.log('inside');
+        gate.savedNode(node =>{
+            node.renderNode()
+        })
+    }
+}
 
 const generateRandomColor = () => {
     let result = '#'
@@ -342,5 +352,5 @@ export {
     hideContextMenu, displayContextMenu, calculateGateCoordinates, validateGateSelection,
     calculateCompoundGateCoordinates, deleteGate,
     dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor,
-    evaluateChip, deleteLine
+    evaluateChip, deleteLine, inspectGate
 }
