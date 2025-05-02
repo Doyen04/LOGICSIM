@@ -86,8 +86,20 @@ const displayContextMenu = (ev, node) => {
     const contextMenuHeader = document.querySelector('.context-menu-header')
     contextMenuHeader.innerHTML = `${node.customName}`
     contextMenu.style.display = 'flex'
-    contextMenu.style.top = `${ev.clientY}px`
-    contextMenu.style.left = `${ev.clientX}px`
+    // Get the dimensions of the context menu and the viewport
+    const menuWidth = contextMenu.offsetWidth;
+    const menuHeight = contextMenu.offsetHeight;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate the initial position using clientX and clientY
+    let x = (ev.clientX + menuWidth > viewportWidth) ? viewportWidth - menuWidth : ev.clientX;
+    let y = (ev.clientY + menuHeight > viewportHeight) ? viewportHeight - menuHeight : ev.clientY;
+
+    // Set the adjusted position
+    contextMenu.style.top = `${y}px`;
+    contextMenu.style.left = `${x}px`;
+
     contextMenu.setAttribute('nodeX', ev.offsetX)
     contextMenu.setAttribute('nodeY', ev.offsetY)
 }
