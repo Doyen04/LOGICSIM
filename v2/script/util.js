@@ -81,10 +81,23 @@ const deleteGate = (gate) => {
         chipset.resetGateState()
     }
 }
+const deleteLine = (connect) => {
+    let fConnection = connectionList.filter(connection => connect.some(wire => connection.sourcePin.id == wire.sourcePin.id))
+    fConnection.forEach(fconnect => {
+        let filterPin = fconnect.sourcePin.connected_nodes.filter(node => !connect.some(wire => node.id == wire.destinationPin.id))
+        fconnect.sourcePin.connected_nodes = filterPin
+        console.log(fconnect.sourcePin, filterPin,);
+    })
+    // remove fConnection and lConnection from connectionList
+    let filterConnection = connectionList.filter(connection => !fConnection.includes(connection))
+    connectionList.reset()
+    connectionList.push(...filterConnection)
+    chipset.resetGateState()
+}
 const displayContextMenu = (ev, node) => {
     const contextMenu = document.querySelector('.context-menu')
     const contextMenuHeader = document.querySelector('.context-menu-header')
-    contextMenuHeader.innerHTML = `${node.customName}`
+    contextMenuHeader.innerHTML = (Array.isArray(node)) ? `WIRE` : `${node.customName}`;
     contextMenu.style.display = 'flex'
     // Get the dimensions of the context menu and the viewport
     const menuWidth = contextMenu.offsetWidth;
@@ -329,5 +342,5 @@ export {
     hideContextMenu, displayContextMenu, calculateGateCoordinates, validateGateSelection,
     calculateCompoundGateCoordinates, deleteGate,
     dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor,
-    evaluateChip
+    evaluateChip, deleteLine
 }

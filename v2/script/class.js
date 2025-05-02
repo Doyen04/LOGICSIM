@@ -8,7 +8,6 @@ class ChipSet extends CustomArray {
     resetGateState() {
         this.forEach(node => {
             if (node.name == 'INPUT' || node.name == 'OUTPUT') {
-                console.log(node.name);
                 (node.name == 'INPUT') ? node.outpin.state = 0 : node.inpin.state = 0;
                 node.state = 0
             } else if (node.name == 'AND' || node.name == 'COMPOUND') {

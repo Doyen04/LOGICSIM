@@ -51,29 +51,27 @@ class CANVAS {
         canvasContext.setLineDash(pattern)
         canvasContext.stroke()
     }
-    detectLineCollision = () => {
-        let result = { start_pos: [], end_pos: [], node: '' }
-        for (let nn = 0; nn < wires.length; nn++) {
-            const wire = wires[nn];
-            let lines = []
-            lines.push([wire.out_node.x, wire.out_node.y])
-            lines.push(...wire.connector)
-            lines.push([wire.in_node.x, wire.in_node.y])
-            for (let ii = 1; ii < lines.length; ii++) {
-                let [x1, y1] = lines[ii - 1]
-                let [x2, y2] = lines[ii]
+    getLineCollision = () => {
+        let result = []
+        connectionList.forEach(connection => {
+            const wire = connection.getArray();
+            for (let x = 1; x < wire.length; x++) {
+                let [x1, y1] = wire[x - 1]
+                let [x2, y2] = wire[x]
                 if (this.isLineColliding(x1, y1, x2, y2)) {
-                    result = { start_pos: [x1, y1], end_pos: [x2, y2], node: wire }
+                    result.push(connection)
+                    break;
                 }
             }
-        } return result
+        })
+        return result
     }
     isLineColliding = (x1, y1, x2, y2) => {
         canvasContext.beginPath()
-        canvasContext.lineWidth = 10
+        canvasContext.lineWidth = 12
         canvasContext.moveTo(x1, y1)
         canvasContext.lineTo(x2, y2)
-        if (canvasContext.isPointInStroke(mouse_pos.x, mouse_pos.y)) {
+        if (canvasContext.isPointInStroke(mousePos.x, mousePos.y)) {
             return true
         } else {
             return false
@@ -95,6 +93,9 @@ class CANVAS {
             }
             this.renderLine(tempArray)
         }
+        this.getLineCollision().forEach(connection =>{
+            this.renderLine(connection.getArray())
+        })
     }
     renderLine = (points) => {
         const radius = 5;

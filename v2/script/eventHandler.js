@@ -5,9 +5,11 @@ import {
     generateRandomColor,
     deleteGate,
     displayContextMenu,
-    hideContextMenu
+    hideContextMenu,
+    deleteLine
 } from './util.js'
 import { gates, chipset, mousePos, connectionList, connection } from './class.js'
+import { canvas } from './canvas.js'
 
 
 
@@ -84,6 +86,8 @@ const onCanvasRightClick = (ev) => {
     } if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
         let gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y))
         if (gate) displayContextMenu(ev, gate)
+        let connect = canvas.getLineCollision()
+        if (connect.length > 0) displayContextMenu(ev, connection)
     }
 }
 
@@ -91,8 +95,10 @@ const onContextMenuClick = (ev) => {
     let x = parseInt(ev.currentTarget.getAttribute('nodeX'))
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
     let gate = chipset.find(chip => chip.collide(x, y))
+    let connect = canvas.getLineCollision()
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
+        if(connect) deleteLine(connect)
         hideContextMenu()
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
         console.log(ev.target);
