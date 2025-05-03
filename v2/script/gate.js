@@ -535,7 +535,7 @@ class CompoundGate extends Node {
         return not
     }
     calculateHeight(inpinLen, outpinLen) {
-        let horizontalGap = 8
+        let horizontalGap = 5
         let pinLen = Math.max(inpinLen, outpinLen)
         return (((this.RADIUS * 2) * pinLen) + (horizontalGap * (pinLen + 1)))
     }
@@ -570,4 +570,45 @@ class CompoundGate extends Node {
 
 }
 
-export { AndGate, NotGate, InputGate, OutputGate, CompoundGate };
+
+class Display extends Node {
+    constructor(x, y, name = "DISPLAY", fill = 'grey', stroke = 'black') {
+        super(x, y, name, fill, stroke)
+        this.customName = name
+        this.w = 100
+        this.h = 130
+        this.inpin = []
+        this.init()
+    }
+    init() {
+        let r = this.RADIUS
+        for (let x = 0; x < 8; x++) {
+            this.inpin.push(new ConnectionPin(this, 0, 0, r, 'IN', this.fill, this.stroke,))
+        }
+        this.calculateBoundingBox()
+        this.pinPositions()
+        // this.renderNode()
+    }
+    pinPositions() {
+        let [inYList, outYList] = this.calculatePinPositions(8, 0, this.RADIUS)
+        this.inpin.forEach((pin, x) => {
+            pin.x = this.x
+            pin.y = inYList[x]
+        });
+    }
+    renderNode() {
+        canvas.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
+        this.inpin.forEach(pin => { pin.draw() })
+        canvas.drawTrapezium(this.x + 10, this.y + (this.h / 2), 'black', 'black', 25, 10, 1)
+
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) - 40, 'black', this.fill, 40, 10, 1)
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) - 40, 'black', this.fill, 40, 10, 1, (Math.PI / 2),[this.x + 40,this.y + (this.h / 2) - 40])
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) - 40, 'black', this.fill, 40, 10, 1, -(Math.PI / 2),[this.x + 40+40,this.y + (this.h / 2) - 40])
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2), 'black', this.fill, 40, 10, 1)
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2), 'black', this.fill, 40, 10, 1, (Math.PI / 2),[this.x + 40,this.y + (this.h / 2)])
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2), 'black', this.fill, 40, 10, 1, -(Math.PI / 2),[this.x + 40+40,this.y + (this.h / 2)])
+        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) + 40, 'black', this.fill, 40, 10, 1)
+    }
+}
+
+export { Display, AndGate, NotGate, InputGate, OutputGate, CompoundGate };

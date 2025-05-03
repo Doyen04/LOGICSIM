@@ -1,8 +1,9 @@
 import { canvas } from './canvas.js'
 import { chipset } from './class.js'
 import {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, saveToLocalStorage,toggleLibrary,
-    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,displayLibrary,onContextMenuClick,
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, saveToLocalStorage, toggleLibrary,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler,
+    addNotGateHandler, displayLibrary, onContextMenuClick, addDisplayHandler,
     addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, onCanvasMouseLeave
 } from './eventHandler.js'
 
@@ -14,7 +15,7 @@ const cancel = document.querySelector('.cancel')
 cancel.addEventListener('click', toggleLibrary)
 
 const newfile = document.querySelector('.newfile')
-newfile.addEventListener('click', ()=>{chipset.reset()})
+newfile.addEventListener('click', () => { chipset.reset() })
 
 const contextMenu = document.querySelector('.context-menu')
 contextMenu.addEventListener('click', onContextMenuClick)
@@ -28,6 +29,8 @@ menuToggleButton.addEventListener('click', toggleMenuHandler)
 const andGateButton = document.querySelector('#and')
 andGateButton.addEventListener('click', addAndGateHandler)
 
+const displayButton = document.querySelector('#lcd')
+displayButton.addEventListener('click', addDisplayHandler)
 
 const notGateButton = document.querySelector('#not')
 notGateButton.addEventListener('click', addNotGateHandler)

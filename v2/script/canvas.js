@@ -51,6 +51,26 @@ class CANVAS {
         canvasContext.setLineDash(pattern)
         canvasContext.stroke()
     }
+    drawTrapezium(x, y, fill, stroke, w, h, lWidth, deg, pivot=[]) {
+        canvasContext.save()
+        canvasContext.translate(pivot[0], pivot[1])
+        canvasContext.rotate(deg)
+        canvasContext.translate(-pivot[0], -pivot[1])
+        canvasContext.beginPath()
+        canvasContext.fillStyle = fill
+        canvasContext.lineWidth = lWidth
+        canvasContext.strokeStyle = stroke
+        canvasContext.moveTo(x, y)
+        canvasContext.lineTo((h / 2 + x), (y - (h / 2)))
+        canvasContext.lineTo((x + (w - (h / 2))), (y - (h / 2)))
+        canvasContext.lineTo((x + w), y)
+        canvasContext.lineTo((x + (w - (h / 2))), (y + (h / 2)))
+        canvasContext.lineTo((x + (h / 2)), (y + (h / 2)))
+        canvasContext.closePath()
+        canvasContext.stroke()
+        canvasContext.fill()
+        canvasContext.restore()
+    }
     getLineCollision = () => {
         let result = []
         connectionList.forEach(connection => {
@@ -93,14 +113,14 @@ class CANVAS {
             }
             this.renderLine(tempArray)
         }
-        this.getLineCollision().forEach(connection =>{
+        this.getLineCollision().forEach(connection => {
             this.renderLine(connection.getArray())
         })
     }
     renderLine = (points) => {
         const radius = 5;
         // remember to add change color for hover line then allow chip to specify line color and increase width
-        canvasContext.strokeStyle = (points[0].length == 3 && points[0][2] == 1)?'red': 'black';
+        canvasContext.strokeStyle = (points[0].length == 3 && points[0][2] == 1) ? 'red' : 'black';
         canvasContext.lineWidth = 5;
         canvasContext.lineJoin = 'round';
 

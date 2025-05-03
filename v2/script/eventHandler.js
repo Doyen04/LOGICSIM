@@ -1,4 +1,4 @@
-import { AndGate, NotGate, InputGate, OutputGate, CompoundGate } from './gate.js'
+import { AndGate, NotGate, InputGate, OutputGate, CompoundGate, Display } from './gate.js'
 import {
     calculateGateCoordinates, validateGateSelection,
     dragLogic, toggleInput, createConnection, calculateCompoundGateCoordinates,
@@ -108,7 +108,7 @@ const onContextMenuClick = (ev) => {
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
     let gate = chipset.find(chip => chip.collide(x, y))
     let connect = canvas.getLineCollision()
-    
+
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
         if (connect) deleteLine(connect)
@@ -144,6 +144,13 @@ const addOutputGateHandler = (ev) => {
     validateGateSelection(ev)
     let [x, y] = calculateGateCoordinates(ev);
     gates.push(new OutputGate(x, y))
+    isAddGateButtonClick = true
+}
+
+const addDisplayHandler = (ev) => {
+    validateGateSelection(ev)
+    let [x, y] = calculateGateCoordinates(ev);
+    gates.push(new Display(x, y))
     isAddGateButtonClick = true
 }
 
@@ -235,7 +242,8 @@ const toggleLibrary = () => {
     modal.classList.toggle('toggle-sidebar');
 }
 export {
-    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave, displayLibrary, onContextMenuClick,
-    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler, saveToLocalStorage,
-    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, toggleLibrary
+    onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, onCanvasMouseLeave, onContextMenuClick,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler, addNotGateHandler,
+    saveToLocalStorage, addDisplayHandler, onCanvasMouseEnter, displayLibrary,
+    addInputGateHandler, addOutputGateHandler, toggleMenuHandler, toggleLibrary
 }

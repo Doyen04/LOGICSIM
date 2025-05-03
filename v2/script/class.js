@@ -11,9 +11,11 @@ class ChipSet extends CustomArray {
                 (node.name == 'INPUT') ? node.outpin.state = 0 : node.inpin.state = 0;
                 node.state = 0
             } else if (node.name == 'AND' || node.name == 'COMPOUND') {
-                node.inpin.forEach(pin => { pin.state = 0 })
+                (node.name == 'COMPOUND') ? node.outpin.forEach(pin => { pin.state = 0 }) : node.outpin.state = 0;
+                node.inpin.forEach(pin => { pin.state = 0 });
             } else if (node.name == 'NOT') {
                 node.inpin.state = 0
+                node.outpin.state = 0
             }
         })
     }
