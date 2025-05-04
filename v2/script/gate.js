@@ -572,7 +572,7 @@ class CompoundGate extends Node {
 
 
 class Display extends Node {
-    constructor(x, y, name = "DISPLAY", fill = 'grey', stroke = 'black') {
+    constructor(x, y, name = "DISPLAY", fill = '#1b1b2c', stroke = 'grey') {
         super(x, y, name, fill, stroke)
         this.customName = name
         this.w = 100
@@ -583,7 +583,7 @@ class Display extends Node {
     init() {
         let r = this.RADIUS
         for (let x = 0; x < 8; x++) {
-            this.inpin.push(new ConnectionPin(this, 0, 0, r, 'IN', this.fill, this.stroke,))
+            this.inpin.push(new ConnectionPin(this, 0, 0, r, 'IN', this.stroke, this.stroke,))
         }
         this.calculateBoundingBox()
         this.pinPositions()
@@ -597,18 +597,54 @@ class Display extends Node {
         });
     }
     renderNode() {
-        canvas.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
-        this.inpin.forEach(pin => { pin.draw() })
-        canvas.drawTrapezium(this.x + 10, this.y + (this.h / 2), 'black', 'black', 25, 10, 1)
-
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) - 40, 'black', this.fill, 40, 10, 1)
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) - 40, 'black', this.fill, 40, 10, 1, (Math.PI / 2),[this.x + 40,this.y + (this.h / 2) - 40])
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) - 40, 'black', this.fill, 40, 10, 1, -(Math.PI / 2),[this.x + 40+40,this.y + (this.h / 2) - 40])
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2), 'black', this.fill, 40, 10, 1)
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2), 'black', this.fill, 40, 10, 1, (Math.PI / 2),[this.x + 40,this.y + (this.h / 2)])
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2), 'black', this.fill, 40, 10, 1, -(Math.PI / 2),[this.x + 40+40,this.y + (this.h / 2)])
-        canvas.drawTrapezium(this.x + 40, this.y + (this.h / 2) + 40, 'black', this.fill, 40, 10, 1)
+        let segWidth = 40;
+        let segHeight = 12;
+        // Draw the main rectangle
+        canvas.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1);
+        // Draw input pins
+        this.inpin.forEach(pin => pin.draw());
+        // Draw the center trapezium
+        const segColor = (x)=> (this.inpin[x].state == 1) ? "red" : this.stroke;
+        canvas.drawTrapezium(this.x + 10, this.y + (this.h / 2), segColor(0), this.fill, 25, segHeight, 1);
+        // Precompute pivot points
+        const baseX = this.x + 40;
+        const baseY = this.y + (this.h / 2);
+        const pivotPoints = {
+            topLeft: [baseX, baseY - segWidth],
+            middleLeft: [baseX, baseY],
+            bottom: [baseX, baseY + segWidth],
+            topRight: [baseX + segWidth, baseY - segWidth],
+            middleRight: [baseX + segWidth, baseY]
+        };
+        // Define trapezium configurations
+        const trapeziumConfigs = [
+            { offsetX: 0, offsetY: -segWidth, rotation: 0, pivot: null },
+            { offsetX: 0, offsetY: -segWidth, rotation: -(Math.PI / 2), pivot: pivotPoints.topRight },
+            { offsetX: 0, offsetY: 0, rotation: -(Math.PI / 2), pivot: pivotPoints.middleRight },
+            { offsetX: 0, offsetY: segWidth, rotation: 0, pivot: null },
+            { offsetX: 0, offsetY: 0, rotation: Math.PI / 2, pivot: pivotPoints.middleLeft },
+            { offsetX: 0, offsetY: -segWidth, rotation: Math.PI / 2, pivot: pivotPoints.topLeft },
+            { offsetX: 0, offsetY: 0, rotation: 0, pivot: null },
+        ];
+        // Draw trapeziums based on configurations
+        trapeziumConfigs.forEach((config, x) => {
+            canvas.drawTrapezium(
+                baseX + config.offsetX,
+                baseY + config.offsetY,
+                segColor(x+1),
+                this.fill,
+                segWidth,
+                segHeight,
+                2,
+                config.rotation,
+                config.pivot
+            );
+        });
     }
+    evaluate() {
+
+    }
+
 }
 
 export { Display, AndGate, NotGate, InputGate, OutputGate, CompoundGate };

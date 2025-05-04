@@ -44,7 +44,7 @@ body {
 header {
     width: 100%;
     height: var(--header-h);
-    background-color: rgb(27, 27, 44);
+    background-color: #1b1b2c;
     display: flex;
     position: relative;
     align-items: center;

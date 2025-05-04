@@ -51,25 +51,41 @@ class CANVAS {
         canvasContext.setLineDash(pattern)
         canvasContext.stroke()
     }
-    drawTrapezium(x, y, fill, stroke, w, h, lWidth, deg, pivot=[]) {
-        canvasContext.save()
-        canvasContext.translate(pivot[0], pivot[1])
-        canvasContext.rotate(deg)
-        canvasContext.translate(-pivot[0], -pivot[1])
-        canvasContext.beginPath()
-        canvasContext.fillStyle = fill
-        canvasContext.lineWidth = lWidth
-        canvasContext.strokeStyle = stroke
-        canvasContext.moveTo(x, y)
-        canvasContext.lineTo((h / 2 + x), (y - (h / 2)))
-        canvasContext.lineTo((x + (w - (h / 2))), (y - (h / 2)))
-        canvasContext.lineTo((x + w), y)
-        canvasContext.lineTo((x + (w - (h / 2))), (y + (h / 2)))
-        canvasContext.lineTo((x + (h / 2)), (y + (h / 2)))
-        canvasContext.closePath()
-        canvasContext.stroke()
-        canvasContext.fill()
-        canvasContext.restore()
+    drawTrapezium(x, y, fill, stroke, w, h, lWidth, deg = 0, pivot = [x, y]) {
+        canvasContext.save();
+
+        // Apply rotation and translation only if a pivot is provided
+        if (pivot && pivot.length === 2) {
+            canvasContext.translate(pivot[0], pivot[1]);
+            canvasContext.rotate(deg);
+            canvasContext.translate(-pivot[0], -pivot[1]);
+        }
+
+        // Precompute trapezium points
+        const halfHeight = h / 2;
+        const points = [
+            { x: x, y: y },
+            { x: x + halfHeight, y: y - halfHeight },
+            { x: x + w - halfHeight, y: y - halfHeight },
+            { x: x + w, y: y },
+            { x: x + w - halfHeight, y: y + halfHeight },
+            { x: x + halfHeight, y: y + halfHeight }
+        ];
+
+        // Draw the trapezium
+        canvasContext.beginPath();
+        canvasContext.fillStyle = fill;
+        canvasContext.lineWidth = lWidth;
+        canvasContext.strokeStyle = stroke;
+
+        canvasContext.moveTo(points[0].x, points[0].y);
+        points.slice(1).forEach(point => canvasContext.lineTo(point.x, point.y));
+        canvasContext.closePath();
+
+        canvasContext.stroke();
+        canvasContext.fill();
+
+        canvasContext.restore();
     }
     getLineCollision = () => {
         let result = []

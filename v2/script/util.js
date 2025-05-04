@@ -36,7 +36,7 @@ const evaluation = (toEvaluate) => {
         node.evaluate()
     })
     toEvaluate.forEach(node => {
-        if (node.name != 'OUTPUT' && node.name != 'COMPOUND') {
+        if (node.name != 'OUTPUT' && node.name != 'COMPOUND' && node.name != 'DISPLAY') {
             node.outpin.connected_nodes.forEach(subnode => {
                 if (!nextGate.includes(subnode.parent)) nextGate.push(subnode.parent)
             })
@@ -120,12 +120,12 @@ const hideContextMenu = () => {
     const contextMenu = document.querySelector('.context-menu')
     contextMenu.style.display = 'none'
 }
-const inspectGate =(ev, gate)=>{
-    let x  = parseInt(ev.currentTarget.getAttribute('nodeX'))
+const inspectGate = (ev, gate) => {
+    let x = parseInt(ev.currentTarget.getAttribute('nodeX'))
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
     if (gate.name == "COMPOUND") {
         console.log('inside');
-        gate.savedNode(node =>{
+        gate.savedNode(node => {
             node.renderNode()
         })
     }
@@ -242,6 +242,12 @@ const node_clicked = (ev, node_list) => {
             for (let j = 0; j < node.outpin.length; j++) {
                 if (node.outpin[j].collide(ev.offsetX, ev.offsetY)) {
                     return node.outpin[j];
+                }
+            }
+        } if (node.name == "DISPLAY") {
+            for (let j = 0; j < node.inpin.length; j++) {
+                if (node.inpin[j].collide(ev.offsetX, ev.offsetY)) {
+                    return node.inpin[j];
                 }
             }
         }
