@@ -208,47 +208,31 @@ function toggleInput(ev) {
 const node_clicked = (ev, node_list) => {
     for (let i = 0; i < node_list.length; i++) {
         const node = node_list[i];
-        if (node.name === 'INPUT' && node.outpin.collide(ev.offsetX, ev.offsetY)) {
-            return node.outpin;
-        }
-        if (node.name === 'OUTPUT' && node.inpin.collide(ev.offsetX, ev.offsetY)) {
-            return node.inpin;
-        }
-        if (node.name === 'AND') {
+        if (node.name === 'AND' || node.name == 'COMPOUND' || node.name == "DISPLAY") {
             for (let j = 0; j < node.inpin.length; j++) {
                 if (node.inpin[j].collide(ev.offsetX, ev.offsetY)) {
                     return node.inpin[j];
                 }
             }
-            if (node.outpin.collide(ev.offsetX, ev.offsetY)) {
+            if (node.name == 'COMPOUND') {
+                for (let j = 0; j < node.outpin.length; j++) {
+                    if (node.outpin[j].collide(ev.offsetX, ev.offsetY)) {
+                        return node.outpin[j];
+                    }
+                }
+            }
+            if (node.name === 'AND' && node.outpin.collide(ev.offsetX, ev.offsetY)) {
                 return node.outpin;
             }
-
         }
-        if (node.name === 'NOT') {
+        if (node.name === 'NOT' || node.name === 'OUTPUT') {
             if (node.inpin.collide(ev.offsetX, ev.offsetY)) {
                 return node.inpin;
             }
+        }
+        if (node.name === 'NOT' || node.name === 'INPUT') {
             if (node.outpin.collide(ev.offsetX, ev.offsetY)) {
                 return node.outpin;
-            }
-        }
-        if (node.name == 'COMPOUND') {
-            for (let j = 0; j < node.inpin.length; j++) {
-                if (node.inpin[j].collide(ev.offsetX, ev.offsetY)) {
-                    return node.inpin[j];
-                }
-            }
-            for (let j = 0; j < node.outpin.length; j++) {
-                if (node.outpin[j].collide(ev.offsetX, ev.offsetY)) {
-                    return node.outpin[j];
-                }
-            }
-        } if (node.name == "DISPLAY") {
-            for (let j = 0; j < node.inpin.length; j++) {
-                if (node.inpin[j].collide(ev.offsetX, ev.offsetY)) {
-                    return node.inpin[j];
-                }
             }
         }
     }

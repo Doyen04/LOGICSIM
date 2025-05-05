@@ -604,7 +604,7 @@ class Display extends Node {
         // Draw input pins
         this.inpin.forEach(pin => pin.draw());
         // Draw the center trapezium
-        const segColor = (x)=> (this.inpin[x].state == 1) ? "red" : this.stroke;
+        const segColor = (x) => (this.inpin[x].state == 1) ? "red" : this.stroke;
         canvas.drawTrapezium(this.x + 10, this.y + (this.h / 2), segColor(0), this.fill, 25, segHeight, 1);
         // Precompute pivot points
         const baseX = this.x + 40;
@@ -631,7 +631,7 @@ class Display extends Node {
             canvas.drawTrapezium(
                 baseX + config.offsetX,
                 baseY + config.offsetY,
-                segColor(x+1),
+                segColor(x + 1),
                 this.fill,
                 segWidth,
                 segHeight,
@@ -643,6 +643,14 @@ class Display extends Node {
     }
     evaluate() {
 
+    }
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            w: this.w,
+            h: this.h,
+            inpin: this.inpin.map(pin => pin.toJSON())
+        }
     }
 
 }
