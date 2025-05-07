@@ -1,5 +1,6 @@
 
 class CustomArray extends Array {
+    
     reset = () => {
         this.length = 0
     }
