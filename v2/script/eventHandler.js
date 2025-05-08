@@ -38,7 +38,7 @@ const onCanvasMouseMove = (ev) => {
     if (gates != '' && (isAddGateButtonClick || isMouseDrag)) {
         dragLogic(newx, newy)
     }
-    if (isMouseDown && ev.movementX != 0 && ev.movementY != 0) isMouseDrag = true;
+    if (isMouseDown && (ev.movementX != 0 || ev.movementY != 0)) isMouseDrag = true;
 
     // if (temp_canvas_class == null) temp_canvas_class = new CANVAS
     // line_selected = temp_canvas_class.get_line_collision()
