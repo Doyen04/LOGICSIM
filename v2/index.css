@@ -245,7 +245,7 @@ header {
 .context-menu > .context-menu-header{
     text-align: center;
 }
-.delete, .inspect{
+.delete, .inspect, .color{
     padding: 5px;
     background-color: var(--b);
     border-radius: 3px;

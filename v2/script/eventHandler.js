@@ -31,7 +31,7 @@ const onCanvasMouseLeave = (ev) => {
     isMouseDrag = false
 }
 
-const onCanvasMouseMove = (ev) => {//console.log(chipset, ev)
+const onCanvasMouseMove = (ev) => {
     let newx = ev.offsetX - mousePos.x
     let newy = ev.offsetY - mousePos.y
     if (gates != '' && (isAddGateButtonClick || isMouseDrag)) {
@@ -43,7 +43,6 @@ const onCanvasMouseMove = (ev) => {//console.log(chipset, ev)
     // line_selected = temp_canvas_class.get_line_collision()
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
-    //console.log(chipset);
 }
 
 const onCanvasMouseClick = (ev) => {
@@ -89,16 +88,29 @@ const onCanvasRightClick = (ev) => {
     ev.preventDefault()
     if (connection.destinationPin == '' || connection.sourcePin == '') {
         connection.reset()
-    } if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
-        let gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y))
+    }
+    if ((isMouseDown == false || isMouseDrag == false) && isAddGateButtonClick == false) {
+
+        const gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y));
+        const connect = canvas.getLineCollision();
+
+        const inspectElem = document.querySelector('.inspect');
+        const colorElems = document.querySelectorAll('.color');
+
         if (gate) {
-            document.querySelector('.inspect').style.display = 'block'
-            displayContextMenu(ev, gate)
-        }
-        let connect = canvas.getLineCollision()
-        if (connect.length > 0) {
-            document.querySelector('.inspect').style.display = 'none'
-            displayContextMenu(ev, connection)
+            inspectElem.style.display = (gate.name === 'COMPOUND') ? 'block' : 'none';
+
+            if (gate.name !== 'COMPOUND') {
+                const showColors = (gate.name === 'INPUT' || gate.name === 'OUTPUT');
+                colorElems.forEach(elem => { elem.style.display = (showColors) ? 'block' : 'none' });
+            } else {
+                colorElems.forEach(elem => { elem.style.display = 'none' });
+            }
+            displayContextMenu(ev, gate);
+        } else if (connect.length > 0) {
+            inspectElem.style.display = 'none';
+            colorElems.forEach(elem => { elem.style.display = 'block' });
+            displayContextMenu(ev, connection);
         }
     }
 }
@@ -107,15 +119,18 @@ const onContextMenuClick = (ev) => {
     let x = parseInt(ev.currentTarget.getAttribute('nodeX'))
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
     let gate = chipset.find(chip => chip.collide(x, y))
-    let connect = canvas.getLineCollision()
+    let connect = canvas.getLineCollision()[0]
 
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
         if (connect) deleteLine(connect)
         hideContextMenu()
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
-        console.log(ev.target);
         inspectGate(ev, gate)
+    } else if (ev.target.classList.contains('color')) {
+        
+        if (connect) connect.changeLineColor(ev.target.innerHTML.toLowerCase())
+        if (gate) gate.changeColor(ev.target.innerHTML.toLowerCase())
     }
 }
 

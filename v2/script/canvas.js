@@ -118,25 +118,19 @@ class CANVAS {
         connectionList.forEach(connection => {
             this.renderLine(connection.getArray())
         })
+        
+        let connectArray = connection.getTemporaryArray()
+        if (connectArray.length >= 1) this.renderLine(connectArray)
 
-        let tempArray = connection.getArray()
-
-        if (tempArray != '') {
-            if (connection.sourcePin) {
-                tempArray.push([mousePos.x, mousePos.y])
-            } else if (connection.destinationPin) {
-                tempArray.unshift([mousePos.x, mousePos.y])
-            }
-            this.renderLine(tempArray)
-        }
-        this.getLineCollision().forEach(connection => {
-            this.renderLine(connection.getArray())
-        })
+        // this.getLineCollision().forEach(connection => {
+        //     this.renderLine(connection.getArray())
+        // })
     }
     renderLine = (points) => {
         const radius = 5;
         // remember to add change color for hover line then allow chip to specify line color and increase width
-        canvasContext.strokeStyle = (points[0].length == 3 && points[0][2] == 1) ? 'red' : 'black';
+        let strokeStyle = (points[0][2])
+        canvasContext.strokeStyle = strokeStyle;
         canvasContext.lineWidth = 5;
         canvasContext.lineJoin = 'round';
 

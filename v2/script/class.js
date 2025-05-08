@@ -1,6 +1,6 @@
 
 class CustomArray extends Array {
-    
+
     reset = () => {
         this.length = 0
     }
@@ -17,6 +17,8 @@ class ChipSet extends CustomArray {
             } else if (node.name == 'NOT') {
                 node.inpin.state = 0
                 node.outpin.state = 0
+            } else if (node.name == 'DISPLAY') {
+                node.inpin.forEach(pin => { pin.state = 0 });
             }
         })
     }
@@ -41,17 +43,53 @@ class Connection extends Array {
     add(array) {
         if (this.sourcePin) {
             this.connectionCoord.push(array)
+            this.strokeStyle = this.sourcePin.wireStroke
         } else if (this.destinationPin) {
             this.connectionCoord.unshift(array)
         }
     }
+    getStroke() {
+        return this.sourcePin.state === 0
+            ? this.sourcePin.wireStroke
+            : this.sourcePin.wireStroke === "#000000"
+                ? '#ff0000'
+                : `${this.sourcePin.wireStroke}99`;
+    }
     getArray = () => {
         let array = []
-        if (this.sourcePin != '') array.push([this.sourcePin.x, this.sourcePin.y, this.sourcePin.state])
+        if (this.sourcePin != '') array.push([this.sourcePin.x, this.sourcePin.y, this.getStroke()])
         if (this.connectionCoord != '') array.push(...this.connectionCoord)
         if (this.destinationPin != '') array.push([this.destinationPin.x, this.destinationPin.y])
 
         return array
+    }
+    randomColor(){
+        let result = '#'
+        let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+        for (let xx = 0; xx < 6; xx++) {
+            result += array[Math.floor(Math.random() * array.length)]
+        }
+        return result;
+    }
+    changeLineColor(string){
+        if(string != 'random'){
+            if(string == 'green')this.sourcePin.wireStroke = '#008000'
+            if(string == 'blue')this.sourcePin.wireStroke = '#0000ff'
+            if(string == 'yellow') this.sourcePin.wireStroke = '#ff0'
+        }else if(string == 'random'){
+            this.sourcePin.wireStroke = this.randomColor()
+        }
+    }
+    getTemporaryArray() {
+        let tempArray = this.getArray()
+
+        if (tempArray != '') {
+            if (this.sourcePin) {
+                tempArray.push([mousePos.x, mousePos.y])
+            } else if (this.destinationPin) {
+                tempArray.unshift([mousePos.x, mousePos.y, this.getStroke()])
+            }
+        } return tempArray
     }
 }
 

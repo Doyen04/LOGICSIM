@@ -24,11 +24,19 @@ class Node {
     }
     generateRandomId() {
         let result = ''
-        let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+        let array = [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
         for (let xx = 0; xx < 6; xx++) {
             result += array[Math.floor(Math.random() * array.length)]
         }
         this.id = result
+    }
+    randomColor(){
+        let result = '#'
+        let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+        for (let xx = 0; xx < 6; xx++) {
+            result += array[Math.floor(Math.random() * array.length)]
+        }
+        return result;
     }
     collide(cx, cy) {
         if (cx > this.x && cy > this.y &&
@@ -69,6 +77,16 @@ class Node {
         canvas.drawRectangle(this.x, this.y, this.fill, this.stroke, this.w, this.h, 1)
         canvas.drawText(this.x, this.y, this.w, this.h, this.customName)
     }
+    changeColor(string) {
+    
+        if (string != 'random') {
+            if (string == 'green') this.fill = '#008000'
+            if (string == 'blue') this.fill = '#0000ff'
+            if (string == 'yellow') this.fill = '#ff0'
+        } else if (string == 'random') {
+            this.fill = this.randomColor()
+        }
+    }
     toJSON() {
         return {
             id: this.id,
@@ -90,6 +108,8 @@ class ConnectionPin extends Node {
         this.connected_nodes = []
         this.state = 0
         this.r = r
+        this.wireStroke = '#000000'
+        this.hint = 'pin'
         // this.outpin = []
     }
     toJSON() {
@@ -103,6 +123,7 @@ class ConnectionPin extends Node {
             y: this.y,
             r: this.r,
             state: 0,
+            wireStroke: this.wireStroke,
             connected_nodes: this.connected_nodes.map(node => node.id), // Include connected_nodes only for outpins
         };
     }
@@ -261,8 +282,8 @@ class InputGate extends Node {
     }
 
     renderNode() {
-        this.fill = (this.state == 0) ? 'blue' : 'red';
-        canvas.drawCircle(this.x, this.y, this.r, this.fill, this.stroke, 1)
+        let fill = (this.state == 0) ? this.fill : 'red';
+        canvas.drawCircle(this.x, this.y, this.r, fill, this.stroke, 1)
         canvas.drawLine((this.x + (this.gap / 2)), this.y, this.outpin.x, this.y, [], this.fill, 1)
         this.outpin.draw()
     }
@@ -325,7 +346,7 @@ class OutputGate extends Node {
 
     }
     renderNode() {
-        let fill = (this.state == 0) ? 'blue' : 'red';
+        let fill = (this.state == 0) ? this.fill : 'red';
         canvas.drawLine(this.x, this.y, this.inpin.x, this.y, [], fill, 1)
         canvas.drawCircle(this.x, this.y, this.r, fill, this.stroke)
         this.inpin.draw()
