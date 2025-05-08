@@ -1,5 +1,5 @@
 import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos } from "./class.js"
-import { calculateAngle } from './util.js'
+import { calculateAngle, node_clicked } from './util.js'
 
 let canvasElement = document.querySelector('#canvas')
 let canvasContext = canvasElement.getContext('2d')
@@ -87,6 +87,22 @@ class CANVAS {
 
         canvasContext.restore();
     }
+    renderHintName() {
+
+        let pin = node_clicked({ offsetX: mousePos.x, offsetY: mousePos.y }, chipset)
+        if (!pin || !pin.hint) return;
+
+        const height = 19;
+        const padding = 10;
+        const yPosition = pin.y - (height / 2);
+
+        const textMetrics = canvasContext.measureText(pin.hint);
+        const width = textMetrics.width + padding;
+        const xPosition = (pin.name == 'IN') ? pin.x - (width + (pin.r * 2)) : pin.x + (pin.r * 2)
+
+        this.drawRectangle(xPosition, yPosition, '#000000', '#000000', width, height, 1);
+        this.drawText(xPosition, yPosition, width, height, pin.hint);
+    }
     getLineCollision = () => {
         let result = []
         connectionList.forEach(connection => {
@@ -115,23 +131,25 @@ class CANVAS {
         }
     }
     renderLineConnection = () => {
+        this.getLineCollision().forEach(connection => {
+            let line = connection.getArray()
+            if (line[0].length == 3) line[0][2] = '#ffffff'
+            this.renderLine(line, 7)
+        })
         connectionList.forEach(connection => {
             this.renderLine(connection.getArray())
         })
-        
+
         let connectArray = connection.getTemporaryArray()
         if (connectArray.length >= 1) this.renderLine(connectArray)
 
-        // this.getLineCollision().forEach(connection => {
-        //     this.renderLine(connection.getArray())
-        // })
     }
-    renderLine = (points) => {
+    renderLine = (points, width = 5) => {
         const radius = 5;
         // remember to add change color for hover line then allow chip to specify line color and increase width
         let strokeStyle = (points[0][2])
         canvasContext.strokeStyle = strokeStyle;
-        canvasContext.lineWidth = 5;
+        canvasContext.lineWidth = width;
         canvasContext.lineJoin = 'round';
 
         canvasContext.beginPath();
@@ -176,6 +194,7 @@ class CANVAS {
         gates.forEach(gate => {
             gate.renderNode()
         })
+        this.renderHintName()
         requestAnimationFrame(this.renderCanvas)
     }
 }

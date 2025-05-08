@@ -342,5 +342,5 @@ export {
     hideContextMenu, displayContextMenu, calculateGateCoordinates, validateGateSelection,
     calculateCompoundGateCoordinates, deleteGate,
     dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor,
-    evaluateChip, deleteLine, inspectGate
+    evaluateChip, deleteLine, inspectGate,node_clicked
 }

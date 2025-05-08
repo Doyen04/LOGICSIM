@@ -7,7 +7,8 @@ import {
     displayContextMenu,
     hideContextMenu,
     deleteLine,
-    inspectGate
+    inspectGate,
+    node_clicked
 } from './util.js'
 import { gates, chipset, mousePos, connectionList, connection } from './class.js'
 import { canvas } from './canvas.js'
@@ -93,6 +94,7 @@ const onCanvasRightClick = (ev) => {
 
         const gate = chipset.find(chip => chip.collide(mousePos.x, mousePos.y));
         const connect = canvas.getLineCollision();
+        const pin = node_clicked(ev, chipset)
 
         const inspectElem = document.querySelector('.inspect');
         const colorElems = document.querySelectorAll('.color');
@@ -107,7 +109,11 @@ const onCanvasRightClick = (ev) => {
                 colorElems.forEach(elem => { elem.style.display = 'none' });
             }
             displayContextMenu(ev, gate);
-        } else if (connect.length > 0) {
+        } else if (pin) {
+            inspectElem.style.display = 'block';
+            displayContextMenu(ev, pin);
+        }
+         else if (connect.length > 0) {
             inspectElem.style.display = 'none';
             colorElems.forEach(elem => { elem.style.display = 'block' });
             displayContextMenu(ev, connection);
@@ -128,7 +134,7 @@ const onContextMenuClick = (ev) => {
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
         inspectGate(ev, gate)
     } else if (ev.target.classList.contains('color')) {
-        
+
         if (connect) connect.changeLineColor(ev.target.innerHTML.toLowerCase())
         if (gate) gate.changeColor(ev.target.innerHTML.toLowerCase())
     }

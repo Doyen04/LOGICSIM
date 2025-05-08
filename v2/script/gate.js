@@ -108,7 +108,6 @@ class ConnectionPin extends Node {
         this.connected_nodes = []
         this.state = 0
         this.r = r
-        this.wireStroke = '#000000'
         this.hint = 'pin'
         // this.outpin = []
     }

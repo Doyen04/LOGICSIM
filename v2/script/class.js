@@ -26,6 +26,7 @@ class ChipSet extends CustomArray {
 class Connection extends Array {
     sourcePin = ''
     destinationPin = ''
+    wireStroke = '#000000'
     connectionCoord = []
 
     clone = () => {
@@ -50,10 +51,10 @@ class Connection extends Array {
     }
     getStroke() {
         return this.sourcePin.state === 0
-            ? this.sourcePin.wireStroke
-            : this.sourcePin.wireStroke === "#000000"
+            ? this.wireStroke
+            : this.wireStroke === "#000000"
                 ? '#ff0000'
-                : `${this.sourcePin.wireStroke}99`;
+                : `${this.wireStroke}99`;
     }
     getArray = () => {
         let array = []
@@ -63,7 +64,7 @@ class Connection extends Array {
 
         return array
     }
-    randomColor(){
+    randomColor() {
         let result = '#'
         let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
         for (let xx = 0; xx < 6; xx++) {
@@ -71,13 +72,13 @@ class Connection extends Array {
         }
         return result;
     }
-    changeLineColor(string){
-        if(string != 'random'){
-            if(string == 'green')this.sourcePin.wireStroke = '#008000'
-            if(string == 'blue')this.sourcePin.wireStroke = '#0000ff'
-            if(string == 'yellow') this.sourcePin.wireStroke = '#ff0'
-        }else if(string == 'random'){
-            this.sourcePin.wireStroke = this.randomColor()
+    changeLineColor(string) {
+        if (string != 'random') {
+            if (string == 'green') this.wireStroke = '#008000'
+            if (string == 'blue') this.wireStroke = '#0000ff'
+            if (string == 'yellow') this.wireStroke = '#ff0'
+        } else if (string == 'random') {
+            this.wireStroke = this.randomColor()
         }
     }
     getTemporaryArray() {
