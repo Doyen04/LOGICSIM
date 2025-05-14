@@ -24,13 +24,13 @@ class Node {
     }
     generateRandomId() {
         let result = ''
-        let array = [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
+        let array = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
         for (let xx = 0; xx < 6; xx++) {
             result += array[Math.floor(Math.random() * array.length)]
         }
         this.id = result
     }
-    randomColor(){
+    randomColor() {
         let result = '#'
         let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
         for (let xx = 0; xx < 6; xx++) {
@@ -78,7 +78,7 @@ class Node {
         canvas.drawText(this.x, this.y, this.w, this.h, this.customName)
     }
     changeColor(string) {
-    
+
         if (string != 'random') {
             if (string == 'green') this.fill = '#008000'
             if (string == 'blue') this.fill = '#0000ff'
@@ -109,6 +109,7 @@ class ConnectionPin extends Node {
         this.state = 0
         this.r = r
         this.hint = 'pin'
+        this.wireStroke = '#000000'
         // this.outpin = []
     }
     toJSON() {

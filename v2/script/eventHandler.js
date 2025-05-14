@@ -10,7 +10,7 @@ import {
     inspectGate,
     node_clicked
 } from './util.js'
-import { gates, chipset, mousePos, connectionList, connection } from './class.js'
+import { gates, chipset, mousePos, connectionList, connection, selectedLine } from './class.js'
 import { canvas } from './canvas.js'
 
 
@@ -40,8 +40,6 @@ const onCanvasMouseMove = (ev) => {
     }
     if (isMouseDown && (ev.movementX != 0 || ev.movementY != 0)) isMouseDrag = true;
 
-    // if (temp_canvas_class == null) temp_canvas_class = new CANVAS
-    // line_selected = temp_canvas_class.get_line_collision()
     mousePos.x = ev.offsetX
     mousePos.y = ev.offsetY
 }

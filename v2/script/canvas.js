@@ -111,6 +111,7 @@ class CANVAS {
                 let [x1, y1] = wire[x - 1]
                 let [x2, y2] = wire[x]
                 if (this.isLineColliding(x1, y1, x2, y2)) {
+                    connection.clickLineSeg = { x1: x1, y1: y1, x2: x2, y2: y2 }
                     result.push(connection)
                     break;
                 }

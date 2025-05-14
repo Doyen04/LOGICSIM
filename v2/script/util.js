@@ -1,9 +1,12 @@
+import { canvas } from "./canvas.js"
 import {
-    chipset, gates, connection, connectionList, Vector, mousePos
+    chipset, gates, connection, connectionList, Vector, mousePos,
+    selectedLine
 } from "./class.js"
 
 const evaluateChip = (chip) => {
     let evaluationList = chip.filter(chip => chip.name == "INPUT")
+    evaluationList = evaluationList.sort((a, b) => b.y - a.y)
     let evaluatedChips = []
 
     while (evaluationList.length > 0) {
@@ -82,11 +85,11 @@ const deleteGate = (gate) => {
     }
 }
 const deleteLine = (connect) => {
-    let fConnection = connectionList.filter(connection => connect.some(wire => connection.sourcePin.id == wire.sourcePin.id))
+
+    let fConnection = connectionList.filter(connection => connection.destinationPin.id == connect.destinationPin.id)
     fConnection.forEach(fconnect => {
-        let filterPin = fconnect.sourcePin.connected_nodes.filter(node => !connect.some(wire => node.id == wire.destinationPin.id))
+        let filterPin = fconnect.sourcePin.connected_nodes.filter(node => node.id !== connect.destinationPin.id)
         fconnect.sourcePin.connected_nodes = filterPin
-        console.log(fconnect.sourcePin, filterPin,);
     })
     // remove fConnection and lConnection from connectionList
     let filterConnection = connectionList.filter(connection => !fConnection.includes(connection))
@@ -266,9 +269,15 @@ const connectNode = () => {
 
 
 const createConnection = (ev) => {
+    const lineSelected = canvas.getLineCollision()[0]
+    // how does object.assign work
+    if (lineSelected) {
+        selectedLine.sourcePin = lineSelected.sourcePin
+        selectedLine.destinationPin = lineSelected.destinationPin
+        selectedLine.connectionCoord.push(...lineSelected.connectionCoord)
+    }
 
     let node = node_clicked(ev, chipset);
-    // console.log(node?.name, node?.x, node?.y);
 
     if (node) {
         if (connectionRules(node, connection.destinationPin, connection)) {
@@ -278,8 +287,6 @@ const createConnection = (ev) => {
         }
     }
 
-    // console.log(connection);
-
     // Handle adding connector points when no node is clicked
     //Ensures we are not clicking on a gate
     //Ensures we are not tying it to an existing connection
@@ -288,23 +295,18 @@ const createConnection = (ev) => {
     }
 
     // create connection from an existing line 
-    // if (!node && line_selected.start_pos) {
-    //     if (connection.sourcePin) {
-    //         connection.connector.push([ev.offsetX, ev.offsetY]);
-    //         update_connector(line_selected.node.connector, line_selected.end_pos, true);
-    //         connection.destinationPin = line_selected.node.destinationPin;
-    //     } else if (connection.destinationPin) {
-    //         connection.sourcePin = line_selected.node.sourcePin;
-    //         const temp = [...connection.connector];
-    //         connection.connector = [];
-    //         update_connector(line_selected.node.connector, line_selected.start_pos);
-    //         connection.connector.push([ev.offsetX, ev.offsetY], ...temp);
-    //     } else if (!connection.sourcePin && !connection.destinationPin) {
-    //         connection.sourcePin = line_selected.node.sourcePin;
-    //         update_connector(line_selected.node.connector, line_selected.start_pos);
-    //         connection.connector.push([ev.offsetX, ev.offsetY]);
-    //     }
-    // }
+    if (!node && selectedLine.sourcePin) {
+        if (connection.destinationPin) {
+            // update_connector(line_selected.node.connector, line_selected.start_pos);
+            connection.add([mousePos.x, mousePos.y]);
+            connection.sourcePin = selectedLine.sourcePin;
+
+        } else if (!connection.sourcePin && !connection.destinationPin) {
+            connection.sourcePin = selectedLine.sourcePin;
+            // update_connector(line_selected.node.connector, line_selected.start_pos);
+            connection.add([mousePos.x, mousePos.y])
+        }
+    }
 
     // Finalize the connection if both ends are defined
     if (connection.sourcePin && connection.destinationPin) {
@@ -312,6 +314,7 @@ const createConnection = (ev) => {
         connectionList.push(connection.clone());
         // Reset connection 
         connection.reset()
+        selectedLine.reset()
     }
 };
 
@@ -342,5 +345,5 @@ export {
     hideContextMenu, displayContextMenu, calculateGateCoordinates, validateGateSelection,
     calculateCompoundGateCoordinates, deleteGate,
     dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor,
-    evaluateChip, deleteLine, inspectGate,node_clicked
+    evaluateChip, deleteLine, inspectGate, node_clicked
 }

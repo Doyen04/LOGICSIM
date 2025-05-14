@@ -26,8 +26,8 @@ class ChipSet extends CustomArray {
 class Connection extends Array {
     sourcePin = ''
     destinationPin = ''
-    wireStroke = '#000000'
     connectionCoord = []
+    clickLineSeg = { x1: 0, y1: 0, x2: 0, y2: 0 }
 
     clone = () => {
         const temp = new Connection()
@@ -40,6 +40,7 @@ class Connection extends Array {
         this.sourcePin = ''
         this.destinationPin = ''
         this.connectionCoord = []
+        console.log(8888, this.sourcePin);
     }
     add(array) {
         if (this.sourcePin) {
@@ -51,10 +52,10 @@ class Connection extends Array {
     }
     getStroke() {
         return this.sourcePin.state === 0
-            ? this.wireStroke
-            : this.wireStroke === "#000000"
+            ? this.sourcePin.wireStroke
+            : this.sourcePin.wireStroke === "#000000"
                 ? '#ff0000'
-                : `${this.wireStroke}99`;
+                : `${this.sourcePin.wireStroke}99`;
     }
     getArray = () => {
         let array = []
@@ -74,11 +75,11 @@ class Connection extends Array {
     }
     changeLineColor(string) {
         if (string != 'random') {
-            if (string == 'green') this.wireStroke = '#008000'
-            if (string == 'blue') this.wireStroke = '#0000ff'
-            if (string == 'yellow') this.wireStroke = '#ff0'
+            if (string == 'green') this.sourcePin.wireStroke = '#008000'
+            if (string == 'blue') this.sourcePin.wireStroke = '#0000ff'
+            if (string == 'yellow') this.sourcePin.wireStroke = '#ff0'
         } else if (string == 'random') {
-            this.wireStroke = this.randomColor()
+            this.sourcePin.wireStroke = this.randomColor()
         }
     }
     getTemporaryArray() {
@@ -134,8 +135,9 @@ const mousePos = (() => {
 
 const connection = new Connection()
 const connectionList = new CustomArray()
+const selectedLine = new Connection()
 
 const gates = new CustomArray()
 const chipset = new ChipSet()
 
-export { gates, chipset, connection, connectionList, Vector2, Vector, mousePos }
+export { gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }
