@@ -40,7 +40,6 @@ class Connection extends Array {
         this.sourcePin = ''
         this.destinationPin = ''
         this.connectionCoord = []
-        console.log(8888, this.sourcePin);
     }
     add(array) {
         if (this.sourcePin) {
@@ -140,4 +139,7 @@ const selectedLine = new Connection()
 const gates = new CustomArray()
 const chipset = new ChipSet()
 
-export { gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }
+const inspectChipset = new ChipSet()
+const inspectConnection = new CustomArray()
+
+export { inspectChipset, inspectConnection, gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }

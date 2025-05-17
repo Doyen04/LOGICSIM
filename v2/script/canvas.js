@@ -1,4 +1,4 @@
-import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos } from "./class.js"
+import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos, inspectChipset, inspectConnection } from "./class.js"
 import { calculateAngle, node_clicked } from './util.js'
 
 let canvasElement = document.querySelector('#canvas')
@@ -132,17 +132,23 @@ class CANVAS {
         }
     }
     renderLineConnection = () => {
-        this.getLineCollision().forEach(connection => {
-            let line = connection.getArray()
-            if (line[0].length == 3) line[0][2] = '#ffffff'
-            this.renderLine(line, 7)
-        })
-        connectionList.forEach(connection => {
-            this.renderLine(connection.getArray())
-        })
+        if (!Array.isArray(inspectConnection[0])) {
+            this.getLineCollision().forEach(connection => {
+                let line = connection.getArray()
+                if (line[0].length == 3) line[0][2] = '#ffffff'
+                this.renderLine(line, 7)
+            })
+            connectionList.forEach(connection => {
+                this.renderLine(connection.getArray())
+            })
 
-        let connectArray = connection.getTemporaryArray()
-        if (connectArray.length >= 1) this.renderLine(connectArray)
+            let connectArray = connection.getTemporaryArray()
+            if (connectArray.length >= 1) this.renderLine(connectArray)
+        } else {
+            inspectConnection[0].forEach(connect => {
+                this.renderLine(connect.getArray())
+            })
+        }
 
     }
     renderLine = (points, width = 5) => {
@@ -166,8 +172,6 @@ class CANVAS {
 
             const dir1 = v1.normalise().multiplyBy(v1.vecLength() - radius);
             const dir2 = v2.normalise().multiplyBy(v2.vecLength() - radius);
-            // console.log(v1.vecLength() - radius, v2.vecLength() - radius);
-
 
             const p1Start = new Vector(...p0).add(dir1); // Point to stop before corner
             const p1End = new Vector(...p2).minus(dir2); // Point to resume after corner
@@ -184,17 +188,27 @@ class CANVAS {
         canvasContext.stroke();
     }
 
+    renderGates = () => {
+        if (!Array.isArray(inspectChipset[0])) {
 
+            chipset.forEach(gate => {
+                gate.renderNode()
+            })
+            gates.forEach(gate => {
+                gate.renderNode()
+            })
+        }
+        else {
+            inspectChipset[0].forEach(gate => {
+                gate.renderNode()
+            })
+        }
+    }
     renderCanvas = () => {
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height)
 
         this.renderLineConnection()
-        chipset.forEach(gate => {
-            gate.renderNode()
-        })
-        gates.forEach(gate => {
-            gate.renderNode()
-        })
+        this.renderGates()
         this.renderHintName()
         requestAnimationFrame(this.renderCanvas)
     }

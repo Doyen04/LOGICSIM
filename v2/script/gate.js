@@ -1,5 +1,5 @@
 import { canvas } from "./canvas.js"
-import { chipset } from "./class.js"
+import { chipset, connection } from "./class.js"
 import { evaluateChip } from "./util.js"
 
 
@@ -208,7 +208,6 @@ class NotGate extends Node {
         this.outpin.connected_nodes.forEach(node => {
             node.state = this.outpin.state
         })
-        // console.log('not', this.outpin.state);
     }
     init() {
         let r = this.RADIUS
@@ -342,8 +341,6 @@ class OutputGate extends Node {
     }
     evaluate() {
         this.state = this.inpin.state
-        // console.log(7777, this.state, this.inpin.state);
-
     }
     renderNode() {
         let fill = (this.state == 0) ? this.fill : 'red';
@@ -390,6 +387,7 @@ class CompoundGate extends Node {
         this.inpin = []
         this.outpin = []
         this.savedNode = []
+        this.savedConnection = []
         this.init()
     }
     init() {
@@ -408,15 +406,12 @@ class CompoundGate extends Node {
 
         this.savedNode.filter(node => node.customName == "OUTPUT").forEach(subnode => {
             let tempNode = new ConnectionPin(this, 0, 0, r, 'OUT', this.fill, this.stroke,)
-            tempNode.overrideId(subnode.id)
             this.outpin.push(tempNode)
         })
 
         this.calculateBoundingBox()
         this.pinPositions()
-        console.log(this.savedNode);
-
-        // this.renderNode()
+        this.constructConnections()
     }
     pinPositions() {
         let [inYList, outYList] = this.calculatePinPositions(this.inpin.length, this.outpin.length, this.RADIUS)
@@ -439,6 +434,9 @@ class CompoundGate extends Node {
         })
 
         evaluateChip(this.savedNode)
+        this.savedNode.filter(node => node.customName == "OUTPUT").forEach((subnode, x) => {
+            this.outpin[x].overrideId(subnode.id)
+        })
 
         const outputNodes = this.savedNode.filter(node => node.name === "OUTPUT");
         // Map the output nodes by their IDs for faster lookup
@@ -457,6 +455,9 @@ class CompoundGate extends Node {
                 node.state = pin.state;
             });
         });
+        this.savedNode.filter(node => node.customName == "OUTPUT").forEach((subnode, x) => {
+            this.outpin[x].generateRandomId()
+        })
     }
     constructGate() {
         let storedNode = JSON.parse(localStorage.getItem(this.customName))
@@ -494,6 +495,37 @@ class CompoundGate extends Node {
         })
 
         this.savedNode = constructedNode
+    }
+    constructConnections() {
+        let storedConnect = JSON.parse(localStorage.getItem(this.customName))
+        let connectionList = Array.from(storedConnect['connection'])
+
+        let connections = []
+        let outputFilterdNode = this.savedNode.filter(node => node.name !== 'OUTPUT')
+        let inputFilteredNode = this.savedNode.filter(node => node.name !== 'INPUT')
+        connectionList.forEach(node => {
+            let tempConnection = connection.clone()
+
+            for (let x = 0; x < outputFilterdNode.length; x++) {
+                if (Array.isArray(outputFilterdNode[x].outpin)) {
+                    tempConnection.sourcePin = outputFilterdNode[x].outpin.find(pin => pin.id == node.sourcePin)
+                } else if (!tempConnection.sourcePin) {
+                    tempConnection.sourcePin = (outputFilterdNode[x].outpin.id == node.sourcePin) ? outputFilterdNode[x].outpin : ''
+                }
+                if (tempConnection.sourcePin) break;
+            }
+            for (let x = 0; x < inputFilteredNode.length; x++) {
+                if (Array.isArray(inputFilteredNode[x].inpin)) {
+                    tempConnection.destinationPin = inputFilteredNode[x].inpin.find(pin => pin.id == node.destinationPin)
+                } else if (!tempConnection.destinationPin) {
+                    tempConnection.destinationPin = (inputFilteredNode[x].inpin.id == node.destinationPin) ? inputFilteredNode[x].inpin : ''
+                }
+                if (tempConnection.destinationPin) break;
+            }
+            tempConnection.connectionCoord = node.connectionCoord
+            connections.push(tempConnection)
+        })
+        this.savedConnection = connections
     }
     getConnectedNode(nodeList, idList) {
         const nodes = [];
@@ -585,7 +617,7 @@ class CompoundGate extends Node {
             h: this.h,
             inpin: this.inpin.map(pin => pin.toJSON()), // Serialize pins
             outpin: this.outpin.map(pin => pin.toJSON()), //
-            savedNode: this.savedNode.map(node => node.toJSON())
+            // savedNode: this.savedNode.map(node => node.toJSON())
         }
     }
 

@@ -46,8 +46,6 @@ const onCanvasMouseMove = (ev) => {
 
 const onCanvasMouseClick = (ev) => {
 
-    console.log(ev.type);
-
     if (isAddGateButtonClick) {
         chipset.push(...gates)
     }
@@ -68,7 +66,6 @@ const onCanvasMouseClick = (ev) => {
 }
 
 const onCanvasMouseDown = (ev) => {
-    console.log(ev.type);
     if (isAddGateButtonClick == false && ev.button == 0) {
         isMouseDown = true
         chipset.forEach(gate => {
@@ -78,11 +75,9 @@ const onCanvasMouseDown = (ev) => {
 }
 
 const onCanvasMouseUp = (ev) => {
-    console.log(ev.type);
     isMouseDown = false
 }
 const onCanvasRightClick = (ev) => {
-    console.log(ev.type);
 
     ev.preventDefault()
     if (connection.destinationPin == '' || connection.sourcePin == '') {
@@ -236,11 +231,9 @@ const loadCircuit = (ev) => {
     const key = ev.currentTarget.getAttribute('name');
     const circuitObject = JSON.parse(localStorage.getItem(key))
     validateGateSelection(ev)
-    // console.log(circuitObject['fill'], circuitObject['stroke']);
 
     let [x, y] = calculateCompoundGateCoordinates(ev)
     gates.push(new CompoundGate(x - 50, y, key, circuitObject['fill'], circuitObject['stroke']))
-    // console.log(gates[0]);
     isAddGateButtonClick = true
 }
 

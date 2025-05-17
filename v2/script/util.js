@@ -1,12 +1,13 @@
 import { canvas } from "./canvas.js"
 import {
     chipset, gates, connection, connectionList, Vector, mousePos,
-    selectedLine
+    selectedLine,
+    inspectChipset,
+    inspectConnection
 } from "./class.js"
 
 const evaluateChip = (chip) => {
     let evaluationList = chip.filter(chip => chip.name == "INPUT")
-    evaluationList = evaluationList.sort((a, b) => b.y - a.y)
     let evaluatedChips = []
 
     while (evaluationList.length > 0) {
@@ -128,9 +129,9 @@ const inspectGate = (ev, gate) => {
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
     if (gate.name == "COMPOUND") {
         console.log('inside');
-        gate.savedNode(node => {
-            node.renderNode()
-        })
+        inspectChipset.unshift(gate.savedNode)
+        inspectConnection.unshift(gate.savedConnection)
+        hideContextMenu()
     }
 }
 
@@ -203,7 +204,6 @@ function toggleInput(ev) {
     chipset.forEach(node => {
         if (node.name == 'INPUT' && node.collide(ev.offsetX, ev.offsetY)) {
             node.toogle_state()
-            // console.log("node clicked :", node);
         }
     })
 }
@@ -257,7 +257,6 @@ const connectionRules = (node_a, node_b, container) => {
 
     const rule = rules.find(rule => rule.condition);
     if (rule) {
-        // console.log(rule.log);
         return true;
     }
     return false;
