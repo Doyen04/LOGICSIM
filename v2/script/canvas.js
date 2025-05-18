@@ -1,4 +1,4 @@
-import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos, inspectChipset, inspectConnection } from "./class.js"
+import { gates, chipset, connection, connectionList, Vector, Vector2, mousePos, } from "./class.js"
 import { calculateAngle, node_clicked } from './util.js'
 
 let canvasElement = document.querySelector('#canvas')
@@ -89,7 +89,7 @@ class CANVAS {
     }
     renderHintName() {
 
-        let pin = node_clicked({ offsetX: mousePos.x, offsetY: mousePos.y }, chipset)
+        let pin = node_clicked({ offsetX: mousePos.x, offsetY: mousePos.y }, chipset[0])
         if (!pin || !pin.hint) return;
 
         const height = 19;
@@ -105,7 +105,7 @@ class CANVAS {
     }
     getLineCollision = () => {
         let result = []
-        connectionList.forEach(connection => {
+        connectionList[0].forEach(connection => {
             const wire = connection.getArray();
             for (let x = 1; x < wire.length; x++) {
                 let [x1, y1] = wire[x - 1]
@@ -132,24 +132,17 @@ class CANVAS {
         }
     }
     renderLineConnection = () => {
-        if (!Array.isArray(inspectConnection[0])) {
             this.getLineCollision().forEach(connection => {
                 let line = connection.getArray()
                 if (line[0].length == 3) line[0][2] = '#ffffff'
                 this.renderLine(line, 7)
             })
-            connectionList.forEach(connection => {
+            connectionList[0].forEach(connection => {
                 this.renderLine(connection.getArray())
             })
 
             let connectArray = connection.getTemporaryArray()
             if (connectArray.length >= 1) this.renderLine(connectArray)
-        } else {
-            inspectConnection[0].forEach(connect => {
-                this.renderLine(connect.getArray())
-            })
-        }
-
     }
     renderLine = (points, width = 5) => {
         const radius = 5;
@@ -189,20 +182,13 @@ class CANVAS {
     }
 
     renderGates = () => {
-        if (!Array.isArray(inspectChipset[0])) {
 
-            chipset.forEach(gate => {
+            chipset[0].forEach(gate => {
                 gate.renderNode()
             })
             gates.forEach(gate => {
                 gate.renderNode()
             })
-        }
-        else {
-            inspectChipset[0].forEach(gate => {
-                gate.renderNode()
-            })
-        }
     }
     renderCanvas = () => {
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height)

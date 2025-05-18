@@ -2,8 +2,8 @@ import { canvas } from './canvas.js'
 import { chipset, connectionList } from './class.js'
 import {
     onCanvasMouseMove, onCanvasMouseClick, onCanvasMouseDown, saveToLocalStorage, toggleLibrary,
-    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler,
-    addNotGateHandler, displayLibrary, onContextMenuClick, addDisplayHandler,
+    onCanvasMouseUp, onCanvasRightClick, addAndGateHandler,inspectTreeNavigationHandler,
+    addNotGateHandler, displayLibrary, onContextMenuClick, addDisplayHandler,createNewFile,
     addInputGateHandler, addOutputGateHandler, toggleMenuHandler, onCanvasMouseEnter, onCanvasMouseLeave
 } from './eventHandler.js'
 
@@ -15,7 +15,7 @@ const cancel = document.querySelector('.cancel')
 cancel.addEventListener('click', toggleLibrary)
 
 const newfile = document.querySelector('.newfile')
-newfile.addEventListener('click', () => { chipset.reset();connectionList.reset() })
+newfile.addEventListener('click', createNewFile)
 
 const contextMenu = document.querySelector('.context-menu')
 contextMenu.addEventListener('click', onContextMenuClick)
@@ -40,6 +40,9 @@ inputGateButton.addEventListener('click', addInputGateHandler)
 
 const outputGateButton = document.querySelector('#out')
 outputGateButton.addEventListener('click', addOutputGateHandler)
+
+const inspectTreeNavigation = document.querySelector('.inspect-tree-navigation')
+inspectTreeNavigation.addEventListener('click', inspectTreeNavigationHandler)
 
 const canvasElement = document.getElementById('canvas')
 canvasElement.addEventListener('mousemove', onCanvasMouseMove)

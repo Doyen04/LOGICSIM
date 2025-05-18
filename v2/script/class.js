@@ -6,8 +6,8 @@ class CustomArray extends Array {
     }
 }
 class ChipSet extends CustomArray {
-    resetGateState() {
-        this.forEach(node => {
+    resetGateState(array) {
+        array.forEach(node => {
             if (node.name == 'INPUT' || node.name == 'OUTPUT') {
                 (node.name == 'INPUT') ? node.outpin.state = 0 : node.inpin.state = 0;
                 node.state = 0
@@ -134,12 +134,14 @@ const mousePos = (() => {
 
 const connection = new Connection()
 const connectionList = new CustomArray()
+connectionList.push([])
+
 const selectedLine = new Connection()
 
 const gates = new CustomArray()
 const chipset = new ChipSet()
+chipset.push([])
 
-const inspectChipset = new ChipSet()
-const inspectConnection = new CustomArray()
+const inspectTreeContentArray = new CustomArray()
 
-export { inspectChipset, inspectConnection, gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }
+export {inspectTreeContentArray, gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }

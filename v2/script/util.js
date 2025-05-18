@@ -2,9 +2,12 @@ import { canvas } from "./canvas.js"
 import {
     chipset, gates, connection, connectionList, Vector, mousePos,
     selectedLine,
-    inspectChipset,
-    inspectConnection
+    inspectTreeContentArray,
 } from "./class.js"
+
+const isInspectMode = () => {
+    return (chipset.length > 1)
+}
 
 const evaluateChip = (chip) => {
     let evaluationList = chip.filter(chip => chip.name == "INPUT")
@@ -69,34 +72,34 @@ const getEvaluated = (evaluated, evaluationList) => {
 }
 
 const deleteGate = (gate) => {
-    const index = chipset.findIndex(chip => chip.id == gate.id)
+    const index = chipset[0].findIndex(chip => chip.id == gate.id)
     if (index > -1) {
-        let fConnection = connectionList.filter(connection => connection.sourcePin.parent.id == gate.id)
-        let lConnection = connectionList.filter(connection => connection.destinationPin.parent.id == gate.id)
+        let fConnection = connectionList[0].filter(connection => connection.sourcePin.parent.id == gate.id)
+        let lConnection = connectionList[0].filter(connection => connection.destinationPin.parent.id == gate.id)
         lConnection.forEach(connect => {
             let filterPin = connect.sourcePin.connected_nodes.filter(node => node.parent.id != gate.id)
             connect.sourcePin.connected_nodes = filterPin
         })
         // remove fConnection and lConnection from connectionList
-        let filterConnection = connectionList.filter(connection => !fConnection.includes(connection) && !lConnection.includes(connection))
-        connectionList.reset()
-        connectionList.push(...filterConnection)
-        chipset.splice(index, 1)
-        chipset.resetGateState()
+        let filterConnection = connectionList[0].filter(connection => !fConnection.includes(connection) && !lConnection.includes(connection))
+        connectionList[0].length = 0
+        connectionList[0].push(...filterConnection)
+        chipset[0].splice(index, 1)
+        chipset.resetGateState(chipset[0])
     }
 }
 const deleteLine = (connect) => {
 
-    let fConnection = connectionList.filter(connection => connection.destinationPin.id == connect.destinationPin.id)
+    let fConnection = connectionList[0].filter(connection => connection.destinationPin.id == connect.destinationPin.id && connection.sourcePin.id == connect.sourcePin.id)
     fConnection.forEach(fconnect => {
         let filterPin = fconnect.sourcePin.connected_nodes.filter(node => node.id !== connect.destinationPin.id)
         fconnect.sourcePin.connected_nodes = filterPin
     })
     // remove fConnection and lConnection from connectionList
-    let filterConnection = connectionList.filter(connection => !fConnection.includes(connection))
-    connectionList.reset()
-    connectionList.push(...filterConnection)
-    chipset.resetGateState()
+    let filterConnection = connectionList[0].filter(connection => !fConnection.includes(connection))
+    connectionList[0].length = 0
+    connectionList[0].push(...filterConnection)
+    chipset.resetGateState(chipset[0])
 }
 const displayContextMenu = (ev, node) => {
     const contextMenu = document.querySelector('.context-menu')
@@ -127,14 +130,30 @@ const hideContextMenu = () => {
 const inspectGate = (ev, gate) => {
     let x = parseInt(ev.currentTarget.getAttribute('nodeX'))
     let y = parseInt(ev.currentTarget.getAttribute('nodeY'))
+    const inspectTree = document.querySelector('.inspect-tree')
+    let menuContainer = document.querySelector(".menu-items")
+
     if (gate.name == "COMPOUND") {
         console.log('inside');
-        inspectChipset.unshift(gate.savedNode)
-        inspectConnection.unshift(gate.savedConnection)
+        inspectTree.style.display = 'flex'
+        menuContainer.style.display = 'none'
+        updateInspectTree(gate.customName)
+
+        chipset.unshift(gate.savedNode)
+        connectionList.unshift(gate.savedConnection)
         hideContextMenu()
     }
 }
-
+const updateInspectTree = (string) => {
+    inspectTreeContentArray.push(string)
+    const inspectTree = document.querySelector('.inspect-tree-content')
+    inspectTree.innerHTML = inspectTreeContentArray.join(' ==> ')
+}
+const removeInspectTree = () => {
+    inspectTreeContentArray.pop()
+    const inspectTree = document.querySelector('.inspect-tree-content')
+    inspectTree.innerHTML = inspectTreeContentArray.join(' => ')
+}
 const generateRandomColor = () => {
     let result = '#'
     let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
@@ -201,8 +220,8 @@ const dragLogic = (cx, cy) => {
 
 function toggleInput(ev) {
 
-    chipset.forEach(node => {
-        if (node.name == 'INPUT' && node.collide(ev.offsetX, ev.offsetY)) {
+    chipset[0].forEach(node => {
+        if (node.name == 'INPUT' && isInspectMode() == false && node.collide(ev.offsetX, ev.offsetY)) {
             node.toogle_state()
         }
     })
@@ -276,7 +295,7 @@ const createConnection = (ev) => {
         selectedLine.connectionCoord.push(...lineSelected.connectionCoord)
     }
 
-    let node = node_clicked(ev, chipset);
+    let node = node_clicked(ev, chipset[0]);
 
     if (node) {
         if (connectionRules(node, connection.destinationPin, connection)) {
@@ -289,7 +308,7 @@ const createConnection = (ev) => {
     // Handle adding connector points when no node is clicked
     //Ensures we are not clicking on a gate
     //Ensures we are not tying it to an existing connection
-    if (!node && /*!line_selected.start_pos &&*/ !chipset.some(n => n.collide(ev.offsetX, ev.offsetY))) {
+    if (!node && /*!line_selected.start_pos &&*/ !chipset[0].some(n => n.collide(ev.offsetX, ev.offsetY))) {
         connection.add([mousePos.x, mousePos.y])
     }
 
@@ -310,10 +329,11 @@ const createConnection = (ev) => {
     // Finalize the connection if both ends are defined
     if (connection.sourcePin && connection.destinationPin) {
         connectNode();
-        connectionList.push(connection.clone());
+        connectionList[0].push(connection.clone());
         // Reset connection 
         connection.reset()
         selectedLine.reset()
+        evaluateChip(chipset)
     }
 };
 
@@ -342,7 +362,7 @@ function calculateAngle(p0, p1, p2) {
 
 export {
     hideContextMenu, displayContextMenu, calculateGateCoordinates, validateGateSelection,
-    calculateCompoundGateCoordinates, deleteGate,
+    calculateCompoundGateCoordinates, deleteGate, isInspectMode,
     dragLogic, toggleInput, createConnection, calculateAngle, generateRandomColor,
-    evaluateChip, deleteLine, inspectGate, node_clicked
+    evaluateChip, deleteLine, inspectGate, node_clicked, removeInspectTree
 }

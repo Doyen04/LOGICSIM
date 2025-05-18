@@ -49,17 +49,50 @@ header {
     position: relative;
     align-items: center;
     justify-content: space-between;
-    padding: 10px;
+    padding: 5px;
     color: white;
     font-family: sans-serif;
     font-weight: bold;
 }
-.logo-container{
+
+.logo-container {
     height: 100%;
-    width: 120px;
+    width: 140px;
     display: flex;
     gap: 9px;
+    align-items: center;
+    padding: 0 0 0 3px;
 }
+
+.logo-container>img {
+    width: 25px;
+    height: 25px;
+}
+
+.inspect-tree {
+    height: 100%;
+    width: max-content;
+    display: none;
+    justify-content: center;
+    gap: 5px;
+    max-width: 80%;
+}
+
+.inspect-tree-content {
+    display: flex;
+    align-items: center;
+    width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inspect-tree-navigation {
+    border: none;
+    padding: 2px;
+    border-radius: 1px;
+}
+
 .menu-items {
     width: 100%;
     display: none;
@@ -146,13 +179,15 @@ header {
     height: 100%;
     background-color: rgb(27, 27, 44);
     border-left: solid 1px var(--t);
-    transform: translateX(100%); /* start hidden */
+    transform: translateX(100%);
+    /* start hidden */
     transition: transform 0.3s ease-in-out;
     z-index: 100;
 }
 
 .toggle-sidebar {
-    transform: translateX(0); /* slide into view */
+    transform: translateX(0);
+    /* slide into view */
 }
 
 .floating-sidebar-header {
@@ -197,10 +232,8 @@ header {
     position: relative;
     color: white;
 }
-.chips:hover .delete-button{
-    display: block;
-}
-.chips>h3{
+
+.chips>h3 {
     padding: 5px;
     white-space: nowrap;
     /* Prevent text from wrapping */
@@ -209,24 +242,54 @@ header {
     text-overflow: ellipsis;
     font-weight: normal;
 }
-.delete-button{
+
+.delete-button {
     display: none;
     position: absolute;
     background-color: transparent;
     right: 0;
     top: 0;
     height: 100%;
-    width: 30px; 
+    width: 30px;
     border: none;
 }
-.delete-icon{
+
+.delete-icon {
     height: 25px;
     width: 25px;
     background-color: white;
     border-radius: 50%;
     cursor: pointer;
 }
-.context-menu{
+
+.chips:hover .delete-button {
+    display: block;
+}
+
+.edit-button {
+    display: none;
+    position: absolute;
+    background-color: transparent;
+    right: 30px;
+    top: 0;
+    height: 100%;
+    width: 30px;
+    border: none;
+}
+
+.edit-icon {
+    height: 25px;
+    width: 25px;
+    background-color: white;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.chips:hover .edit-button {
+    display: block;
+}
+
+.context-menu {
     width: 150px;
     height: fit-content;
     position: absolute;
@@ -242,11 +305,27 @@ header {
     padding: 5px;
     border-radius: 0px 5px 5px 5px;
 }
-.context-menu > .context-menu-header{
+
+.context-menu>.context-menu-header {
     text-align: center;
 }
-.delete, .inspect, .color{
+
+.delete,
+.inspect,
+.color {
     padding: 5px;
     background-color: var(--b);
     border-radius: 3px;
+}
+
+.input {
+    width: 100%;
+    outline: 0;
+    border: none;
+}
+
+.text,
+.submit {
+    position: relative;
+    width: 100%;
 }

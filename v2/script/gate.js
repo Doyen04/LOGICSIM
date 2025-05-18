@@ -258,7 +258,7 @@ class InputGate extends Node {
         this.state = (this.state == 0) ? 1 : 0;
         this.outpin.state = this.state
 
-        evaluateChip(chipset)
+        evaluateChip(chipset[0])
     }
     evaluate() {
         this.outpin.state = this.state
