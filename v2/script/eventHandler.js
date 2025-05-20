@@ -125,15 +125,15 @@ const onContextMenuClick = (ev) => {
 
     if (ev.target.innerHTML.toLowerCase() == 'delete') {
         if (gate) deleteGate(gate)
-        if (connect) deleteLine(connect)
+        else if (connect) deleteLine(connect)
         hideContextMenu()
     } else if (ev.target.innerHTML.toLowerCase() == 'inspect') {
         inspectGate(ev, gate)
         hideContextMenu()
     } else if (ev.target.classList.contains('color')) {
 
-        if (connect) connect.changeLineColor(ev.target.innerHTML.toLowerCase())
         if (gate) gate.changeColor(ev.target.innerHTML.toLowerCase())
+        else if (connect) connect.changeLineColor(ev.target.innerHTML.toLowerCase())
             hideContextMenu()
     } else if (ev.target.classList.contains('submit')) {
         pin.hint = document.querySelector('.text').value

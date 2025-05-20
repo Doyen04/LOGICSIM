@@ -10,22 +10,20 @@ const isInspectMode = () => {
 }
 
 const evaluateChip = (chip) => {
-    let evaluationList = chip.filter(chip => chip.name == "INPUT")
-    let evaluatedChips = []
-
-    while (evaluationList.length > 0) {
-
-        let evaluated = getEvaluated(evaluatedChips, evaluationList)
-        if (evaluated.length > 0) {
-            reEvaluation(evaluated, evaluatedChips)
+    for (let xx = 0; xx < 2; xx++) {
+        let evaluationList = chip.filter(chip => chip.name == "INPUT")
+        let evaluatedChips = []
+    
+        while (evaluationList.length > 0) {
+            let evaluated = getEvaluated(evaluatedChips, evaluationList)
+            if (evaluated.length > 0) {
+                reEvaluation(evaluated, evaluatedChips)
+            }
+            let nonEvaluated = getNonEvaluated(evaluatedChips, evaluationList)
+            evaluationList = evaluation(nonEvaluated)
+            evaluatedChips.push(...nonEvaluated)
         }
-        //filter out non evaluated
-        let nonEvaluated = getNonEvaluated(evaluatedChips, evaluationList)
-        evaluationList = evaluation(nonEvaluated)
-        evaluatedChips.push(...nonEvaluated)
-
     }
-
 }
 const reEvaluation = (evaluated, evaluatedChips) => {
     let evaluationList = evaluation(evaluated)
@@ -37,6 +35,7 @@ const reEvaluation = (evaluated, evaluatedChips) => {
         touched = getEvaluated(evaluationList, evaluatedChips)
     }
 }
+
 const evaluation = (toEvaluate) => {
     let nextGate = []
     toEvaluate.forEach(node => {
