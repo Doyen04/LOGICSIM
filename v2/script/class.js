@@ -92,6 +92,30 @@ class Connection extends Array {
             }
         } return tempArray
     }
+    isArraysEqual(a, b) {
+        return Array.isArray(a) && Array.isArray(b) && a.length == a.length && a.every((val, index) => val === b[index])
+    }
+    splitArrayAt(array, searchElem) {
+        const index = array.findIndex(item => this.isArraysEqual(item, searchElem))
+        if (index == -1) {
+            return [array.slice(), []]
+        }
+        let x = []
+        const firstPart = array.slice(0, index+1)
+        // const secondPrt = array.slice(index)
+        return firstPart
+    }
+    createFrmExistingConnection(existConnection){
+        const clickedLine = existConnection.clickLineSeg
+        const connectionCoord = existConnection.connectionCoord
+        if (this.sourcePin) {
+            let result = this.splitArrayAt(connectionCoord, [clickedLine.x1, clickedLine.y1])
+            this.connectionCoord.push(...result)
+        }else if(this.destinationPin){
+            let result = this.splitArrayAt(connectionCoord, [clickedLine.x1, clickedLine.y1])
+            this.connectionCoord.unshift(...result)
+        }
+    }
 }
 
 class Vector extends Array {
@@ -144,4 +168,4 @@ chipset.push([])
 
 const inspectTreeContentArray = new CustomArray()
 
-export {inspectTreeContentArray, gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }
+export { inspectTreeContentArray, gates, chipset, connection, connectionList, selectedLine, Vector2, Vector, mousePos }

@@ -293,6 +293,7 @@ const createConnection = (ev) => {
         selectedLine.sourcePin = lineSelected.sourcePin
         selectedLine.destinationPin = lineSelected.destinationPin
         selectedLine.connectionCoord.push(...lineSelected.connectionCoord)
+        selectedLine.clickLineSeg = lineSelected.clickLineSeg
     }
 
     let node = node_clicked(ev, chipset[0]);
@@ -308,20 +309,20 @@ const createConnection = (ev) => {
     // Handle adding connector points when no node is clicked
     //Ensures we are not clicking on a gate
     //Ensures we are not tying it to an existing connection
-    if (!node && /*!line_selected.start_pos &&*/ !chipset[0].some(n => n.collide(ev.offsetX, ev.offsetY))) {
+    if (!node && !selectedLine.sourcePin && !chipset[0].some(n => n.collide(ev.offsetX, ev.offsetY))) {
         connection.add([mousePos.x, mousePos.y])
     }
 
     // create connection from an existing line 
     if (!node && selectedLine.sourcePin) {
         if (connection.destinationPin) {
-            // update_connector(line_selected.node.connector, line_selected.start_pos);
             connection.add([mousePos.x, mousePos.y]);
+            connection.createFrmExistingConnection(selectedLine);
             connection.sourcePin = selectedLine.sourcePin;
 
         } else if (!connection.sourcePin && !connection.destinationPin) {
             connection.sourcePin = selectedLine.sourcePin;
-            // update_connector(line_selected.node.connector, line_selected.start_pos);
+            connection.createFrmExistingConnection(selectedLine);
             connection.add([mousePos.x, mousePos.y])
         }
     }
