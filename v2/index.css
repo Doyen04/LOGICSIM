@@ -278,16 +278,17 @@ header {
 }
 
 .edit-icon {
-    height: 25px;
-    width: 25px;
+    height: 20px;
+    width: 20px;
     background-color: white;
-    border-radius: 50%;
+    border-radius: 5px;
     cursor: pointer;
 }
 
 .chips:hover .edit-button {
     display: block;
 }
+
 
 .context-menu {
     width: 150px;

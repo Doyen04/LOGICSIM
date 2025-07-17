@@ -225,11 +225,11 @@ const displayLibrary = () => {
             item.classList.add('chips');
             item.innerHTML = `
             <h3  data-key="${key}">${key}</h3>
-            <button class="delete-button" data-key="${key}">
+            <button class="delete-button" data-key="${key}" title="Click to remove circuit">
                 <img class="delete-icon" src="./assets/cancel.png" />
             </button>
-            <button class="edit-button" data-key="${key}">
-                <img class="edit-icon" src="./assets/cancel.png" />
+            <button class="edit-button" data-key="${key}" title="Click to edit circuit">
+                <img class="edit-icon" src="./assets/edit.png" />
             </button>
         `;
 
